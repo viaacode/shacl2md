@@ -74,19 +74,18 @@ WHERE {
 
 GET_PROPERTIES = """
 PREFIX sh: <http://www.w3.org/ns/shacl#>
-SELECT DISTINCT ?iri ?label ?description ?min ?max ?class ?datatype ?datatype_label
+SELECT DISTINCT ?subjectclassNode ?iri ?label ?datatype ?datatype_label ?classtype ?classtype_label ?min ?max 
 WHERE {
-    ?class sh:property ?property.
+    ?subjectclassNode sh:property ?property.
 
     ?property sh:path ?iri;
-            sh:name ?label;
-            sh:description ?description.
-
+            sh:name ?label .
+    FILTER(lang(?label) = ?lang)
     OPTIONAL {?property sh:minCount ?min}
     OPTIONAL {?property sh:maxCount ?max}
-    OPTIONAL {?property sh:class ?class}
-    OPTIONAL {?property sh:datatype ?datatype}
-
-    OPTIONAL {?datatype rdfs:label ?datatype_label}
+    OPTIONAL {?property sh:datatype ?datatype .
+       OPTIONAL{?datatype rdfs:label ?datatype_label} }
+    OPTIONAL {?property sh:class ?classtype .
+       OPTIONAL{?classtype rdfs:label ?classtype_label} }
 }
 """

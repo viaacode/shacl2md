@@ -27,9 +27,15 @@
 - [{{class.label}}]({{class.iri}})
 {% endfor %}
 
-**Properties:** 
+**Properties:**
+
 {% for property in properties %}
-- [{{property.label}}]({{property.iri}})
+{% if property.datatype is defined %}
+- [{{property.label}}]({{property.iri}}), {{property.datatype.label}}
+{% endif %}
+{% if property.classtype is defined %}
+- [{{property.label}}]({{property.iri}}), {{property.classtype.label}}
+{% endif %}
 {% endfor %}
 
 {% for class in classes %}
@@ -52,8 +58,12 @@
 | :------ | :----- | :---------- | :------- | :-- | :-- |
 
 {% for property in class.properties %}
+{% if property.datatype is defined %}
 | <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.iri}}]({{property.iri}}) | {{property.description}} | [{{property.datatype.shortname}}]({{property.datatype.iri}}) | {{property.min}} | {{property.max}} |
-
+{% endif %}
+{% if property.classtype is defined %}
+| <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.iri}}]({{property.iri}}) | {{property.description}} | [{{property.classtype.shortname}}]({{property.classtype.iri}}) | {{property.min}} | {{property.max}} |
+{% endif %}
 
 {% endfor %}
 {% endfor %}
