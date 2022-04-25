@@ -51,6 +51,9 @@ WHERE {
     ?iri a rdfs:Class;
         rdfs:label ?label;
         rdfs:comment ?description.
+        FILTER(lang(?label) = ?lang)
+        FILTER(lang(?description) = ?lang)
+
 }
 """
 
@@ -63,6 +66,9 @@ WHERE {
     ?iri a rdfs:Class;
         rdfs:label ?label;
         rdfs:comment ?description.
+        FILTER(lang(?label) = ?lang)
+        FILTER(lang(?description) = ?lang)
+
 }
 """
 

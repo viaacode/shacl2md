@@ -27,10 +27,10 @@ def get_classes(g):
                 "label": row.label,
                 "description": row.description,
                 "parent": list(
-                    g.query(GET_SUPERCLASSES, initBindings={"child": row.iri})
+                    g.query(GET_SUPERCLASSES, initBindings={"child": row.iri, "lang": Literal("nl")})
                 ),
                 "child": list(
-                    g.query(GET_SUBCLASSES, initBindings={"parent": row.iri})
+                    g.query(GET_SUBCLASSES, initBindings={"parent": row.iri, "lang": Literal("nl")})
                 ),
                 "properties": list(get_properties(g, row.iri)),
             }
@@ -46,6 +46,7 @@ def get_properties(g, c=None):
     else:
         qres = g.query(GET_PROPERTIES)
     for row in qres:
+        print(row)
         properties.append(
             {
                 "iri": row.iri,
@@ -71,7 +72,6 @@ def main(args):
     g = Graph()
     for file in args.files:
         g.parse(file)
-
     env = Environment(
         loader=PackageLoader("shacl2md"),
         autoescape=select_autoescape(),
