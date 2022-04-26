@@ -42,7 +42,7 @@ def get_classes(g):
 def get_properties(g, c=None):
     properties = []
     if c is not None:
-        qres = g.query(GET_PROPERTIES, initBindings={"lang": Literal("nl"), "subjectclass": c})
+        qres = g.query(GET_PROPERTIES, initBindings={"lang": Literal("nl"), "targetClass": c})
     else:
         qres = g.query(GET_PROPERTIES, initBindings={"lang": Literal("nl")})
     for row in qres:
@@ -53,7 +53,7 @@ def get_properties(g, c=None):
                 "iri": row.iri,
                 "shortname": row.iri.n3(g.namespace_manager),
                 "label": row.label,
-                #"description": row.description,
+                "description": row.description,
                 
             }
         )
@@ -69,7 +69,7 @@ def get_properties(g, c=None):
                 "iri": row.classtype,
                 "shortname": row.classtype.n3(g.namespace_manager),
             }
-    print(properties)
+    # print(properties)
     return properties
 
 

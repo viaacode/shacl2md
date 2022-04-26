@@ -74,18 +74,22 @@ WHERE {
 
 GET_PROPERTIES = """
 PREFIX sh: <http://www.w3.org/ns/shacl#>
-SELECT DISTINCT ?subjectclassNode ?iri ?label ?datatype ?datatype_label ?classtype ?classtype_label ?min ?max 
+PREFIX schema: <http://schema.org/>
+SELECT DISTINCT ?targetClass ?subjectclassNode ?iri ?label ?datatype ?datatype_label ?classtype ?classtype_label ?min ?max ?description
 WHERE {
+    ?subjectclassNode sh:targetClass ?targetClass .
     ?subjectclassNode sh:property ?property.
-
     ?property sh:path ?iri;
             sh:name ?label .
     FILTER(lang(?label) = ?lang)
+    OPTIONAL {?iri rdfs:comment ?description
+        FILTER(lang(?description) = ?lang) }
     OPTIONAL {?property sh:minCount ?min}
     OPTIONAL {?property sh:maxCount ?max}
     OPTIONAL {?property sh:datatype ?datatype .
        OPTIONAL{?datatype rdfs:label ?datatype_label} }
     OPTIONAL {?property sh:class ?classtype .
-       OPTIONAL{?classtype rdfs:label ?classtype_label} }
+       OPTIONAL{?classtype rdfs:label ?classtype_label .
+       FILTER(lang(?classtype_label) = ?lang)} }
 }
 """
