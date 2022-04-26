@@ -41,14 +41,15 @@
 {% for class in classes %}
 ## Class: [{{class.label}}]({{class.iri}})
 
+
+{% if class.parent is defined and class.parent|length > 0 %}
 **Subclass of:** 
-{% if class.parent is defined %}
 {% for parent in class.parent %}
 [{{parent.label}}]({{parent.iri}}), 
 {% endfor %}
 {% endif %}
+{% if class.child is defined and class.child|length > 0%}
 **Subclasses:** 
-{% if class.child is defined %}
 {% for child in class.child %}
 [{{child.label}}]({{child.iri}}), 
 {% endfor %}
