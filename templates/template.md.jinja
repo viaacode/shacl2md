@@ -30,12 +30,7 @@
 **Properties:**
 
 {% for property in properties %}
-{% if property.datatype is defined %}
-- [{{property.label}}]({{property.iri}}), {{property.datatype.label}}
-{% endif %}
-{% if property.classtype is defined %}
-- [{{property.label}}]({{property.iri}}), {{property.classtype.label}}
-{% endif %}
+- [{{property.label}}]({{property.iri}})
 {% endfor %}
 
 {% for class in classes %}

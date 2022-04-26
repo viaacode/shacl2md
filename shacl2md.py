@@ -5,8 +5,7 @@ from rdflib.graph import Graph
 from rdflib.namespace import DCTERMS, FOAF, OWL, RDF, RDFS, SKOS, Namespace
 from rdflib.term import BNode, Literal, URIRef
 
-from queries import (GET_AUTHORS, GET_CLASSES, GET_DOC_MD, GET_PROPERTIES,
-                     GET_SUBCLASSES, GET_SUPERCLASSES)
+from queries import (GET_AUTHORS, GET_CLASSES, GET_DOC_MD, GET_PROPERTIES, GET_PROPERTIES_LIST, GET_SUBCLASSES, GET_SUPERCLASSES)
 
 SHACL = Namespace("http://www.w3.org/ns/shacl#")
 
@@ -44,9 +43,9 @@ def get_properties(g, c=None):
     if c is not None:
         qres = g.query(GET_PROPERTIES, initBindings={"lang": Literal("nl"), "targetClass": c})
     else:
-        qres = g.query(GET_PROPERTIES, initBindings={"lang": Literal("nl")})
+        qres = g.query(GET_PROPERTIES_LIST, initBindings={"lang": Literal("nl")})
     for row in qres:
-        # print(row)
+        # print(type(row))
 
         properties.append(
             {
@@ -57,13 +56,13 @@ def get_properties(g, c=None):
                 
             }
         )
-        if row.datatype:
+        if row.get("datatype"):
             properties[-1]["datatype"] = {
                 "label": row.datatype_label,
                 "iri": row.datatype,
                 "shortname": row.datatype.n3(g.namespace_manager),
             }
-        elif row.classtype:
+        elif row.get("classtype"):
             properties[-1]["classtype"] = {
                 "label": row.classtype_label,
                 "iri": row.classtype,
