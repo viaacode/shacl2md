@@ -55,6 +55,7 @@ WHERE {
         FILTER(lang(?description) = ?lang)
 
 }
+ORDER BY ?label
 """
 
 GET_SUPERCLASSES = """
@@ -70,6 +71,7 @@ WHERE {
         FILTER(lang(?description) = ?lang)
 
 }
+ORDER BY ?label
 """
 
 GET_PROPERTIES = """
@@ -92,4 +94,27 @@ WHERE {
        OPTIONAL{?classtype rdfs:label ?classtype_label .
        FILTER(lang(?classtype_label) = ?lang)} }
 }
+ORDER BY ?label
+"""
+GET_PROPERTIES_LIST = """
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+PREFIX schema: <http://schema.org/>
+SELECT DISTINCT ?iri ?label ?description
+WHERE {
+    ?subjectclassNode sh:targetClass ?targetClass .
+    ?subjectclassNode sh:property ?property.
+    ?property sh:path ?iri;
+            sh:name ?label .
+    FILTER(lang(?label) = ?lang)
+    OPTIONAL {?iri rdfs:comment ?description
+        FILTER(lang(?description) = ?lang) }
+    OPTIONAL {?property sh:minCount ?min}
+    OPTIONAL {?property sh:maxCount ?max}
+    OPTIONAL {?property sh:datatype ?datatype .
+       OPTIONAL{?datatype rdfs:label ?datatype_label} }
+    OPTIONAL {?property sh:class ?classtype .
+       OPTIONAL{?classtype rdfs:label ?classtype_label .
+       FILTER(lang(?classtype_label) = ?lang)} }
+}
+ORDER BY ?label
 """

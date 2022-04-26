@@ -5,10 +5,11 @@
 {% for author in doc.authors %}
 - [{{author.label}}](mailto:{{author.email}})
 {% endfor %}
+
 **Version:** {{doc.version}}
 **Prior version:** {{doc.prior_version}}
 **Created:** {{doc.created}}
-**Last modified:** {{doc.last_modified}}
+**Last modified:** {{doc.modified}}
 
 {{doc.description}}
 
@@ -35,7 +36,7 @@
 
 {% for class in classes %}
 ## Class: [{{class.label}}]({{class.iri}})
-
+{{class.description}}
 
 {% if class.parent is defined and class.parent|length > 0 %}
 **Subclass of:** 
