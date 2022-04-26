@@ -25,18 +25,21 @@
 
 **Classes:** 
 {% for class in classes %}
-- [{{class.label}}]({{class.iri}})
+- [{{class.label}}](#{{class.shortname|lower|urlencode}})
 {% endfor %}
 
 **Properties:**
 
 {% for property in properties %}
-- [{{property.label}}]({{property.iri}})
+- [{{property.label}}](#{{property.shortname|lower|urlencode}})
 {% endfor %}
 
 {% for class in classes %}
-## Class: [{{class.label}}]({{class.iri}})
+## <a name="{{class.shortname|lower|urlencode}}"> Class: {{class.label}} </a>
+**{{class.shortname}}** <br>
+{{class.iri}} <br>
 {{class.description}}
+
 
 {% if class.parent is defined and class.parent|length > 0 %}
 **Subclass of:** 
@@ -58,7 +61,7 @@
 | <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.iri}}]({{property.iri}}) | {{property.description}} | [{{property.datatype.shortname}}]({{property.datatype.iri}}) | {{property.min}} | {{property.max}} |
 {% endif %}
 {% if property.classtype is defined %}
-| <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.iri}}]({{property.iri}}) | {{property.description}} | [{{property.classtype.shortname}}]({{property.classtype.iri}}) | {{property.min}} | {{property.max}} |
+| <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.iri}}]({{property.iri}}) | {{property.description}} | [{{property.classtype.shortname}}](#{{property.classtype.shortname|lower|urlencode}}) | {{property.min}} | {{property.max}} |
 {% endif %}
 {% endfor %}
 {% endfor %}

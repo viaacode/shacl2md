@@ -45,8 +45,6 @@ def get_properties(g, c=None):
     else:
         qres = g.query(GET_PROPERTIES_LIST, initBindings={"lang": Literal("nl")})
     for row in qres:
-        # print(type(row))
-
         properties.append(
             {
                 "iri": row.iri,
@@ -62,12 +60,16 @@ def get_properties(g, c=None):
                 "iri": row.datatype,
                 "shortname": row.datatype.n3(g.namespace_manager),
             }
+            properties[-1]["min"] = row.min
+            properties[-1]["max"] = row.max
         elif row.get("classtype"):
             properties[-1]["classtype"] = {
                 "label": row.classtype_label,
                 "iri": row.classtype,
                 "shortname": row.classtype.n3(g.namespace_manager),
             }
+            properties[-1]["min"] = row.min
+            properties[-1]["max"] = row.max
     # print(properties)
     return properties
 
