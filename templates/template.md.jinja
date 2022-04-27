@@ -37,7 +37,7 @@
 {% for class in classes %}
 ## <a name="{{class.shortname|lower|urlencode}}"> Class: {{class.label}} </a>
 **{{class.shortname}}** <br>
-{{class.iri}} <br>
+[{{class.iri}}]({{class.iri}}) <br>
 {{class.description}}
 
 
@@ -54,6 +54,7 @@
 {% endfor %}
 {% endif %}
 
+{% if class.properties|length > 0%}
 | Property | URI   | Description | Datatype | Min | Max |
 | :------ | :----- | :---------- | :------- | :-- | :-- |
 {% for property in class.properties %}
@@ -64,4 +65,6 @@
 | <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.iri}}]({{property.iri}}) | {{property.description}} | [{{property.classtype.shortname}}](#{{property.classtype.shortname|lower|urlencode}}) | {{property.min}} | {{property.max}} |
 {% endif %}
 {% endfor %}
+{% endif %}
+
 {% endfor %}
