@@ -58,7 +58,7 @@
 | :------ | :----- | :---------- | :------- | :-- | :-- |
 {% for property in class.properties %}
 {% if property.datatype is defined %}
-| <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.iri}}]({{property.iri}}) | {{property.description}} | [{{property.datatype.shortname}}]({{property.datatype.iri}}) | {{property.min}} | {{property.max}} |
+| <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.iri}}]({{property.iri}}) | {{property.description}} | [{{property.datatype.shortname}}]({{property.datatype.iri}}) {% if property.datatype.thesaurus is defined %} Mogelijke waarden: {{property.datatype.thesaurus}} {% endif %} | {{property.min}} | {{property.max}} |
 {% endif %}
 {% if property.classtype is defined %}
 | <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.iri}}]({{property.iri}}) | {{property.description}} | [{{property.classtype.shortname}}](#{{property.classtype.shortname|lower|urlencode}}) | {{property.min}} | {{property.max}} |

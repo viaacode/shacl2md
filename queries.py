@@ -77,7 +77,7 @@ ORDER BY ?label
 GET_PROPERTIES = """
 PREFIX sh: <http://www.w3.org/ns/shacl#>
 PREFIX schema: <http://schema.org/>
-SELECT DISTINCT ?targetClass ?subjectclassNode ?iri ?label ?datatype ?datatype_label ?classtype ?classtype_label ?min ?max ?description
+SELECT DISTINCT ?targetClass ?subjectclassNode ?iri ?label ?datatype ?datatype_label ?classtype ?classtype_label ?min ?max ?description (GROUP_CONCAT(?thesaurusitem;separator=", ") AS ?thesaurus)
 WHERE {
     ?subjectclassNode sh:targetClass ?targetClass .
     ?subjectclassNode sh:property ?property.
@@ -93,7 +93,10 @@ WHERE {
     OPTIONAL {?property sh:class ?classtype .
        OPTIONAL{?classtype rdfs:label ?classtype_label .
        FILTER(lang(?classtype_label) = ?lang)} }
+    OPTIONAL {?property sh:in ?thesaurusnode .
+       OPTIONAL{?thesaurusnode rdf:rest*/rdf:first ?thesaurusitem} }
 }
+GROUP BY ?targetClass ?subjectclassNode ?iri ?label ?datatype ?datatype_label ?classtype ?classtype_label ?min ?max ?description
 ORDER BY ?label
 """
 GET_PROPERTIES_LIST = """
