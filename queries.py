@@ -90,7 +90,7 @@ WHERE {
     OPTIONAL {?property sh:maxCount ?max}
     OPTIONAL {?property sh:datatype ?datatype .
        OPTIONAL{?datatype rdfs:label ?datatype_label} }
-    OPTIONAL {?property sh:class ?classtype .
+    OPTIONAL {?property sh:or*/rdf:rest*/rdf:first/sh:class ?classtype .
        OPTIONAL{?classtype rdfs:label ?classtype_label .
        FILTER(lang(?classtype_label) = ?lang)} }
     OPTIONAL {?property sh:in ?thesaurusnode .
