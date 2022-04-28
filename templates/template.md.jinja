@@ -25,12 +25,12 @@
 
 **Classes:** 
 {% for class in classes %}
-[{{class.label}}](#{{class.shortname|lower|urlencode}}) |
+{% if loop.index > 1 %} | {% endif %} [{{class.label}}](#{{class.shortname|lower|urlencode}})
 {% endfor %}
 
 **Properties:**
 {% for property in properties %}
-[{{property.label}}](#{{property.shortname|lower|urlencode}}) |
+{% if loop.index > 1 %} | {% endif %} [{{property.label}}](#{{property.shortname|lower|urlencode}})
 {% endfor %}
 
 {% for class in classes %}
@@ -46,7 +46,7 @@
 {% if class.subclasses is defined and class.subclasses|length > 0%}
 **Subclasses:** 
 {% for child in class.subclasses %}
-[{{child.shortname}}](#{{child.shortname|lower|urlencode}}), 
+{% if loop.index > 1 %}, {% endif %}[{{child.shortname}}](#{{child.shortname|lower|urlencode}})
 {% endfor %}
 {% endif %}
 
