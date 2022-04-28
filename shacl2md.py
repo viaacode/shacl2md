@@ -25,15 +25,30 @@ def get_classes(g):
                 "shortname": row.iri.n3(g.namespace_manager),
                 "label": row.label,
                 "description": row.description,
-                "parent": list(
-                    g.query(GET_SUPERCLASSES, initBindings={"child": row.iri, "lang": Literal("nl")})
-                ),
-                "child": list(
-                    g.query(GET_SUBCLASSES, initBindings={"parent": row.iri, "lang": Literal("nl")})
-                ),
+                # parent property that class GET_SUPERCLASS query from g and adds shortname
+                "superclasses": [
+                ],
+                "subclasses": [
+                ],
                 "properties": list(get_properties(g, row.iri)),
             }
         )
+
+        for parent in g.query(GET_SUPERCLASSES, initBindings={"lang": Literal("nl"), "child": row.iri}):
+            
+            classes[-1]["superclasses"].append(
+                {"iri": parent.iri, "shortname": parent.iri.n3(g.namespace_manager)}
+            )
+            # print(list(get_properties(g, parent.iri)))
+            classes[-1]["properties"].extend(list(get_properties(g, parent.iri)))
+        for child in g.query(GET_SUBCLASSES, initBindings={"lang": Literal("nl"), "parent": row.iri}):
+            classes[-1]["subclasses"].append(
+                {"iri": child.iri, "shortname": child.iri.n3(g.namespace_manager)}
+            )
+            
+
+
+
     return classes
 
 

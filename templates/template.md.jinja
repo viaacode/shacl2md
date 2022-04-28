@@ -25,44 +25,43 @@
 
 **Classes:** 
 {% for class in classes %}
-- [{{class.label}}](#{{class.shortname|lower|urlencode}})
+[{{class.label}}](#{{class.shortname|lower|urlencode}}) |
 {% endfor %}
 
 **Properties:**
-
 {% for property in properties %}
-- [{{property.label}}](#{{property.shortname|lower|urlencode}})
+[{{property.label}}](#{{property.shortname|lower|urlencode}}) |
 {% endfor %}
 
 {% for class in classes %}
 ## <a name="{{class.shortname|lower|urlencode}}"> Class: {{class.label}} </a>
 **{{class.shortname}}** <br>
-[{{class.iri}}]({{class.iri}}) <br>
+**URI:** [{{class.shortname}}]({{class.iri}}) <br>
+{% if class.superclasses is defined and class.superclasses|length > 0 %}
+**Subclass of:** 
+{% for parent in class.superclasses %}
+[{{parent.shortname}}](#{{parent.shortname|lower|urlencode}})
+{% endfor %}
+{% endif %}
+{% if class.subclasses is defined and class.subclasses|length > 0%}
+**Subclasses:** 
+{% for child in class.subclasses %}
+[{{child.shortname}}](#{{child.shortname|lower|urlencode}}), 
+{% endfor %}
+{% endif %}
+
 {{class.description}}
 
-
-{% if class.parent is defined and class.parent|length > 0 %}
-**Subclass of:** 
-{% for parent in class.parent %}
-[{{parent.label}}]({{parent.iri}}), 
-{% endfor %}
-{% endif %}
-{% if class.child is defined and class.child|length > 0%}
-**Subclasses:** 
-{% for child in class.child %}
-[{{child.label}}]({{child.iri}}), 
-{% endfor %}
-{% endif %}
 
 {% if class.properties|length > 0%}
 | Property | URI   | Description | Datatype | Min | Max |
 | :------ | :----- | :---------- | :------- | :-- | :-- |
 {% for property in class.properties %}
 {% if property.datatype is defined %}
-| <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.iri}}]({{property.iri}}) | {{property.description}} | [{{property.datatype.shortname}}]({{property.datatype.iri}}) {% if property.datatype.thesaurus is defined %} Mogelijke waarden: {{property.datatype.thesaurus}} {% endif %} | {{property.min}} | {{property.max}} |
+| <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.shortname}}]({{property.iri}}) | {{property.description}} | [{{property.datatype.shortname}}]({{property.datatype.iri}}) {% if property.datatype.thesaurus is defined %} Mogelijke waarden: {{property.datatype.thesaurus}} {% endif %} | {% if property.min != None %} {{property.min}} {% endif %} | {% if property.max != None %} {{property.max}} {% endif %} |
 {% endif %}
 {% if property.classtype is defined %}
-| <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.iri}}]({{property.iri}}) | {{property.description}} | [{{property.classtype.shortname}}](#{{property.classtype.shortname|lower|urlencode}}) | {{property.min}} | {{property.max}} |
+| <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.shortname}}]({{property.iri}}) | {{property.description}} | [{{property.classtype.shortname}}](#{{property.classtype.shortname|lower|urlencode}}) | {% if property.min != None %} {{property.min}} {% endif %} | {% if property.max != None %} {{property.max}} {% endif %} |
 {% endif %}
 {% endfor %}
 {% endif %}
