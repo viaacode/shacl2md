@@ -84,8 +84,18 @@ WHERE {
     ?property sh:path ?iri;
             sh:name ?label .
     FILTER(lang(?label) = ?lang)
-    OPTIONAL {?iri rdfs:comment ?description
-        FILTER(lang(?description) = ?lang) }
+    OPTIONAL {?iri rdfs:comment ?rdfsdescription
+        FILTER(lang(?rdfsdescription) = ?lang) 
+    }
+    OPTIONAL {?property sh:description ?shacldescription
+        FILTER(lang(?shacldescription) = ?lang) 
+    }
+    BIND (
+        COALESCE(
+            IF(bound(?shacldescription), ?shacldescription, 1/0),
+            IF(bound(?rdfsdescription), ?rdfsdescription, 1/0)
+        ) AS ?description
+    )
     OPTIONAL {?property sh:minCount ?min}
     OPTIONAL {?property sh:maxCount ?max}
     OPTIONAL {?property sh:datatype ?datatype .
@@ -114,10 +124,12 @@ WHERE {
     OPTIONAL {?property sh:minCount ?min}
     OPTIONAL {?property sh:maxCount ?max}
     OPTIONAL {?property sh:datatype ?datatype .
-       OPTIONAL{?datatype rdfs:label ?datatype_label} }
+       OPTIONAL{?datatype rdfs:label ?datatype_label}
+    }
     OPTIONAL {?property sh:class ?classtype .
        OPTIONAL{?classtype rdfs:label ?classtype_label .
        FILTER(lang(?classtype_label) = ?lang)} }
 }
 ORDER BY ?label
 """
+
