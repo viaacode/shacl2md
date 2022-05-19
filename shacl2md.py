@@ -33,7 +33,6 @@ def get_classes(g, lang):
                 "properties": list(get_properties(g, row.iri, lang)),
             }
         )
-
         for parent in g.query(GET_SUPERCLASSES, initBindings={"lang": Literal(lang), "child": row.iri}):
             
             classes[-1]["superclasses"].append(
@@ -45,16 +44,11 @@ def get_classes(g, lang):
             classes[-1]["subclasses"].append(
                 {"iri": child.iri, "shortname": child.iri.n3(g.namespace_manager)}
             )
-            
-
-
-
     return classes
 
 
 def get_properties(g, c, lang):
     properties = []
-
     qres = g.query(GET_PROPERTIES, initBindings={"lang": Literal(lang), "targetClass": c})
     for row in qres:
         properties.append(
@@ -68,7 +62,7 @@ def get_properties(g, c, lang):
         )
         if row.get("datatype"):
             properties[-1]["datatype"] = {
-                "label": row.datatype_label,
+                "label": row.datatype.n3(g.namespace_manager).replace("xsd:","").replace("edtf:",""),
                 "iri": row.datatype,
                 "shortname": row.datatype.n3(g.namespace_manager),
             }
@@ -92,7 +86,6 @@ def get_authors(g):
 
 
 def main(args):
-
     g = Graph()
     for file in args.files:
         g.parse(file)
@@ -101,10 +94,9 @@ def main(args):
         autoescape=select_autoescape(),
         trim_blocks=True,
     )
-
     template = env.get_template("template.md.jinja")
     lang = args.language
-    print(lang)
+    # print(lang)
     print(
         template.render(
             doc=get_doc(g, lang),
@@ -127,9 +119,9 @@ if __name__ == "__main__":
        "--language",
         metavar="language",
         type=str,
-        default="en",
+        default="nl",
         required=False,
-        help="language of generated documentation, default is \"en\"",
+        help="language of generated documentation, default is \"nl\"",
     )
     args = parser.parse_args()
     # print(args.accumulate(args.files))
