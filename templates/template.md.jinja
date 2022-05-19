@@ -13,6 +13,25 @@
 
 {{doc.description}}
 
+```mermaid
+classDiagram
+{% for class in classes %}
+class {{class.label}}
+{% if class.properties|length > 0%}
+{% for classtype_label, properties in class.properties|groupby('classtype.label', default="None") -%}
+{% if classtype_label != "None" %}
+{{class.label}} --> {{classtype_label}} : {{properties|join("/", attribute="label")}}
+{% else %}
+{% for property in properties %}
+{{class.label}} : {{property.datatype.label}} {{property.label}} 
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+```
+{% raw %}{% include mermaid.html %}{% endraw %}
+
 ## Namespaces
 
 | Prefix | URI      |
@@ -26,11 +45,6 @@
 **Classes:** 
 {% for class in classes %}
 {% if loop.index > 1 %} | {% endif %} [{{class.label}}](#{{class.shortname|lower|urlencode}})
-{% endfor %}
-
-**Properties:**
-{% for property in properties %}
-{% if loop.index > 1 %} | {% endif %} [{{property.label}}](#{{property.shortname|lower|urlencode}})
 {% endfor %}
 
 {% for class in classes %}
@@ -51,7 +65,6 @@
 {% endif %}
 
 {{class.description}}
-
 
 {% if class.properties|length > 0%}
 | Property | URI   | Description | Datatype | Min | Max |
