@@ -1,0 +1,40 @@
+
+<!-- Add to _includes folder to render mermaid diagrams in Jekyll (like just the docs). -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/9.1.1/mermaid.min.js"></script>
+<script>
+	var config = {
+		startOnLoad: true,
+		theme: 'default',
+		flowchart: {
+			useMaxWidth: true,
+			htmlLabels: true,
+			theme: 'forrest'
+		}
+	};
+	mermaid.initialize(config);
+	window.mermaid.init(undefined, document.querySelectorAll('.language-mermaid'));
+	document.querySelectorAll('.language-mermaid').forEach(function (el) {
+		var svgElement = el.children[0];
+		const [, , originalWidth, originalHeight] = svgElement.getAttribute("viewBox").split(" ").map(Number);
+
+		svgElement.addEventListener("mousemove", (event) => {
+			const { top, left, width, height } = svgElement.getBoundingClientRect();
+
+			const eventTop = event.clientY - top;
+			const eventLeft = event.clientX - left;
+
+			svgElement.setAttribute("viewBox", `${eventLeft / width * originalWidth - originalWidth / 5} ${eventTop / height * originalHeight - originalHeight / 5} ${originalWidth / 2.5} ${originalHeight / 2.5}`)
+		});
+		svgElement.addEventListener("mouseout", () => {
+			svgElement.setAttribute("viewBox", `0 0 ${originalWidth} ${originalHeight}`);
+		});
+
+	});
+</script>
+<style media="screen">
+	code.language-mermaid {
+		background-color: transparent;
+		border: none;
+	}
+</style>

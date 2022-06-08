@@ -5,12 +5,32 @@
 {% for author in doc.authors %}
 - [{{author.label}}](mailto:{{author.email}})
 {% endfor %}
+
 **Version:** {{doc.version}}
 **Prior version:** {{doc.prior_version}}
 **Created:** {{doc.created}}
-**Last modified:** {{doc.last_modified}}
+**Last modified:** {{doc.modified}}
 
 {{doc.description}}
+
+```mermaid
+classDiagram
+{% for class in classes %}
+class {{class.label}}
+{% if class.properties|length > 0%}
+{% for classtype_label, properties in class.properties|groupby('classtype.label', default="None") -%}
+{% if classtype_label != "None" %}
+{{class.label}} --> {{classtype_label}} : {{properties|join("/", attribute="label")}}
+{% else %}
+{% for property in properties %}
+{{class.label}} : {{property.datatype.label}} {{property.label}} 
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+```
+{% raw %}{% include mermaid.html %}{% endraw %}
 
 ## Namespaces
 
@@ -24,36 +44,39 @@
 
 **Classes:** 
 {% for class in classes %}
-- [{{class.label}}]({{class.iri}})
-{% endfor %}
-
-**Properties:** 
-{% for property in properties %}
-- [{{property.label}}]({{property.iri}})
+{% if loop.index > 1 %} | {% endif %} [{{class.label}}](#{{class.shortname|lower|urlencode}})
 {% endfor %}
 
 {% for class in classes %}
-## Class: [{{class.label}}]({{class.iri}})
-
+## <a name="{{class.shortname|lower|urlencode}}"> Class: {{class.label}} </a>
+**{{class.shortname}}** <br>
+**URI:** [{{class.shortname}}]({{class.iri}}) <br>
+{% if class.superclasses is defined and class.superclasses|length > 0 %}
 **Subclass of:** 
-{% if class.parent is defined %}
-{% for parent in class.parent %}
-[{{parent.label}}]({{parent.iri}}), 
+{% for parent in class.superclasses %}
+[{{parent.shortname}}](#{{parent.shortname|lower|urlencode}})
 {% endfor %}
 {% endif %}
+{% if class.subclasses is defined and class.subclasses|length > 0%}
 **Subclasses:** 
-{% if class.child is defined %}
-{% for child in class.child %}
-[{{child.label}}]({{child.iri}}), 
+{% for child in class.subclasses %}
+{% if loop.index > 1 %}, {% endif %}[{{child.shortname}}](#{{child.shortname|lower|urlencode}})
 {% endfor %}
 {% endif %}
 
+{{class.description}}
+
+{% if class.properties|length > 0%}
 | Property | URI   | Description | Datatype | Min | Max |
 | :------ | :----- | :---------- | :------- | :-- | :-- |
-
 {% for property in class.properties %}
-| <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.iri}}]({{property.iri}}) | {{property.description}} | [{{property.datatype.shortname}}]({{property.datatype.iri}}) | {{property.min}} | {{property.max}} |
-
-
+{% if property.datatype is defined %}
+| <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.shortname}}]({{property.iri}}) | {{property.description}} | [{{property.datatype.shortname}}]({{property.datatype.iri}}) {% if property.datatype.thesaurus is defined %} Mogelijke waarden: {{property.datatype.thesaurus}} {% endif %} | {% if property.min != None %} {{property.min}} {% endif %} | {% if property.max != None %} {{property.max}} {% endif %} |
+{% endif %}
+{% if property.classtype is defined %}
+| <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.shortname}}]({{property.iri}}) | {{property.description}} | [{{property.classtype.shortname}}](#{{property.classtype.shortname|lower|urlencode}}) | {% if property.min != None %} {{property.min}} {% endif %} | {% if property.max != None %} {{property.max}} {% endif %} |
+{% endif %}
 {% endfor %}
+{% endif %}
+
 {% endfor %}
