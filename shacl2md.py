@@ -130,6 +130,6 @@ if __name__ == "__main__":
         required=False,
         help='language of generated documentation, default is "nl"',
     )
-    args = parser.parse_args()
-    # print(args.accumulate(args.files))
-    main(args)
+    argsv = parser.parse_args()
+    # print(argsv.accumulate(args.files))
+    main(argsv)
