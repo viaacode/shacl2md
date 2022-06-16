@@ -14,21 +14,7 @@
 {{doc.description}}
 
 ```mermaid
-classDiagram
-{% for class in classes %}
-class {{class.label}}
-{% if class.properties|length > 0%}
-{% for classtype_label, properties in class.properties|groupby('classtype.label', default="None") -%}
-{% if classtype_label != "None" %}
-{{class.label}} --> {{classtype_label}} : {{properties|join("/", attribute="label")}}
-{% else %}
-{% for property in properties %}
-{{class.label}} : {{property.datatype.label}} {{property.label}} 
-{% endfor %}
-{% endif %}
-{% endfor %}
-{% endif %}
-{% endfor %}
+{% include 'mermaid.jinja' %}
 ```
 {% raw %}{% include mermaid.html %}{% endraw %}
 
@@ -48,7 +34,7 @@ class {{class.label}}
 {% endfor %}
 
 {% for class in classes %}
-## <a name="{{class.shortname|lower|urlencode}}"> Class: {{class.label}} </a>
+## <a name="{{class.shortname|lower|urlencode}}">Class: {{class.label}}</a>
 **{{class.shortname}}** <br>
 **URI:** [{{class.shortname}}]({{class.iri}}) <br>
 {% if class.superclasses is defined and class.superclasses|length > 0 %}

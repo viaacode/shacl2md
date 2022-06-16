@@ -1,0 +1,22 @@
+classDiagram
+{% for class in classes %}
+class {{class.label}}
+
+{% if class.superclasses|length > 0 %}
+{% for superclass in class.superclasses %}
+{{class.label}} --|> {{superclass.label}}
+{% endfor %}
+{% endif %}
+
+{% if class.properties|length > 0 %}
+{% for classtype_label, properties in class.properties|groupby('classtype.label', default="None") -%}
+{% if classtype_label != "None" %}
+{{class.label}} "1" --> "*" {{classtype_label}} : {{properties|join("/", attribute="label")}}
+{% else %}
+{% for property in properties %}
+{{class.label}} : {{property.datatype.label}} {{property.label}} 
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %} 
