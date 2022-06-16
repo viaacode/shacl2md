@@ -2,9 +2,9 @@ import argparse
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 from rdflib.graph import Graph
-from rdflib.namespace import DCTERMS, FOAF, OWL, RDF, RDFS, SKOS, Namespace
-from rdflib.term import BNode, Literal, URIRef
-from util import to_local_name, to_label, to_shortname
+from rdflib.namespace import Namespace
+from rdflib.term import Literal
+from util import to_label, to_shortname
 
 from queries import (
     GET_AUTHORS,
@@ -20,73 +20,77 @@ SHACL = Namespace("http://www.w3.org/ns/shacl#")
 
 def get_doc(g, lang):
     for row in g.query(GET_DOC_MD, initBindings={"lang": Literal(lang)}):
-        row.authors = list(get_authors(g))
+        row.authors = list(g.query(GET_AUTHORS))
         return row
 
 
-def extract(g, row):
-    return {
-        "iri": row.iri,
-        "shortname": to_shortname(g, row.iri),
-        "label": to_label(g, row.iri),
-        "description": row.description,
-    }
+def get_superclasses(g, c, lang):
+    for parent in g.query(
+        GET_SUPERCLASSES, initBindings={"lang": Literal(lang), "child": c}
+    ):
+        yield {
+            "iri": parent.iri,
+            "shortname": to_shortname(g, parent.iri),
+            "label": to_label(g, parent.iri),
+            "description": parent.description,
+            "properties": list(get_properties(g, parent.iri, lang)),
+        }
+
+
+def get_subclasses(g, c, lang):
+    for child in g.query(
+        GET_SUBCLASSES, initBindings={"lang": Literal(lang), "parent": c}
+    ):
+        yield {
+            "iri": child.iri,
+            "shortname": to_shortname(g, child.iri),
+            "label": to_label(g, child.iri),
+            "description": child.description,
+        }
 
 
 def get_classes(g, lang):
-    classes = []
-    for row in g.query(GET_CLASSES, initBindings={"lang": Literal(lang)}):
-        classes.append(extract(g, row))
-        # add properties to class
-        classes[-1]["properties"] = list(get_properties(g, row.iri, lang))
-
-        # parent property that class GET_SUPERCLASS query from g and adds shortname
-        classes[-1]["superclasses"] = []
-        classes[-1]["subclasses"] = []
-        for parent in g.query(
-            GET_SUPERCLASSES, initBindings={"lang": Literal(lang), "child": row.iri}
-        ):
-
-            classes[-1]["superclasses"].append(extract(g, parent))
-            # print(list(get_properties(g, parent.iri)))
-            classes[-1]["properties"].extend(list(get_properties(g, parent.iri, lang)))
-        for child in g.query(
-            GET_SUBCLASSES, initBindings={"lang": Literal(lang), "parent": row.iri}
-        ):
-            classes[-1]["subclasses"].append(extract(g, child))
-    return classes
+    for c in g.query(GET_CLASSES, initBindings={"lang": Literal(lang)}):
+        yield {
+            "iri": c.iri,
+            "shortname": to_shortname(g, c.iri),
+            "label": to_label(g, c.iri),
+            "description": c.description,
+            "properties": list(get_properties(g, c.iri, lang)),
+            "superclasses": list(get_superclasses(g, c.iri, lang)),
+            "subclasses": list(get_subclasses(g, c.iri, lang)),
+        }
 
 
 def get_properties(g, c, lang):
-    properties = []
     qres = g.query(
         GET_PROPERTIES, initBindings={"lang": Literal(lang), "targetClass": c}
     )
     for row in qres:
-        properties.append(extract(g, row))
+        result = {
+            "iri": row.iri,
+            "shortname": to_shortname(g, row.iri),
+            "label": to_label(g, row.iri),
+            "description": row.description,
+            "min": row.min,
+            "max": row.max,
+        }
         if row.get("datatype"):
-            properties[-1]["datatype"] = {
+            result["datatype"] = {
                 "label": to_label(g, row.datatype),
                 "iri": row.datatype,
                 "shortname": to_shortname(g, row.datatype),
             }
             if bool(row.thesaurus):
-                properties[-1]["datatype"]["thesaurus"] = row.thesaurus
-            properties[-1]["min"] = row.min
-            properties[-1]["max"] = row.max
+                result["thesaurus"] = row.thesaurus
+
         elif row.get("classtype"):
-            properties[-1]["classtype"] = {
+            result["classtype"] = {
                 "label": row.classtype_label,
                 "iri": row.classtype,
-                "shortname": row.classtype.n3(g.namespace_manager),
+                "shortname": to_shortname(g, row.classtype),
             }
-            properties[-1]["min"] = row.min
-            properties[-1]["max"] = row.max
-    return properties
-
-
-def get_authors(g):
-    return g.query(GET_AUTHORS)
+        yield result
 
 
 def main(args):
@@ -105,8 +109,7 @@ def main(args):
         template.render(
             doc=get_doc(g, lang),
             namespaces=g.namespace_manager.namespaces(),
-            classes=get_classes(g, lang=lang),
-            authors=get_authors(g),
+            classes=list(get_classes(g, lang=lang)),
         )
     )
 
