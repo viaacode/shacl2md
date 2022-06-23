@@ -113,26 +113,27 @@ def main(args):
     template = env.get_template("template.md.jinja")
     puml_template = env.get_template("diagram.puml.jinja")
 
-    output_dir = "./"
+    output_dir = args.out
 
     print(
         puml_template.render(
             namespaces=namespaces,
             classes=classes,
         ),
-        file=open(output_dir +"./diagram.puml", "w"),
+        file=open(output_dir + f"/{args.name}-diagram.puml", "w"),
     )
 
     pl = PlantUML("http://www.plantuml.com/plantuml/img/")
-    pl.processes_file(output_dir + "/diagram.puml", directory=output_dir)
+    pl.processes_file(output_dir + f"/{args.name}-diagram.puml", directory=output_dir)
 
     print(
         template.render(
             doc=doc,
             namespaces=namespaces,
             classes=classes,
-            diagram=output_dir + "/diagram.png"
-        )
+            diagram=output_dir + f"/{args.name}-diagram.png"
+        ),
+        file=open(output_dir + f"/{args.name}.md", "w"),
     )
 
 
@@ -151,6 +152,22 @@ if __name__ == "__main__":
         default="nl",
         required=False,
         help='language of generated documentation, default is "nl"',
+    )
+    parser.add_argument(
+        "--out",
+        metavar="out",
+        type=str,
+        default="./",
+        required=False,
+        help='output directory for files, default is "./"',
+    )
+    parser.add_argument(
+        "--name",
+        metavar="name",
+        type=str,
+        default="output",
+        required=False,
+        help='filename for the output file, default is "output"',
     )
     argsv = parser.parse_args()
     # print(argsv.accumulate(args.files))
