@@ -103,3 +103,47 @@ WHERE {
 GROUP BY ?targetClass ?subjectclassNode ?iri ?label ?datatype ?datatype_label ?classtype ?classtype_label ?min ?max ?description
 ORDER BY ?label
 """
+
+
+GET_ATTRIBUTES = """
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+PREFIX schema: <http://schema.org/>
+SELECT DISTINCT ?targetClass ?subjectclassNode ?iri ?label ?datatype ?datatype_label ?min ?max ?description
+WHERE {
+    ?subjectclassNode sh:targetClass ?targetClass;
+                      sh:property ?property.
+    ?property sh:path ?iri;
+              sh:datatype ?datatype .
+
+    OPTIONAL{ ?datatype rdfs:label ?datatype_label}
+
+    OPTIONAL {?property sh:name ?shname
+        FILTER(lang(?shname) = ?lang) 
+    }
+    OPTIONAL {?property rdfs:label ?rdfslabel
+        FILTER(lang(?rdfslabel) = ?lang) 
+    }
+    BIND (
+        COALESCE(
+            IF(bound(?shname), ?shname, 1/0),
+            IF(bound(?rdfslabel), ?rdfslabel, 1/0)
+        ) AS ?label
+    )
+
+    OPTIONAL {?iri rdfs:comment ?rdfsdescription
+        FILTER(lang(?rdfsdescription) = ?lang) 
+    }
+    OPTIONAL {?property sh:description ?shacldescription
+        FILTER(lang(?shacldescription) = ?lang) 
+    }
+    BIND (
+        COALESCE(
+            IF(bound(?shacldescription), ?shacldescription, 1/0),
+            IF(bound(?rdfsdescription), ?rdfsdescription, 1/0)
+        ) AS ?description
+    )
+    OPTIONAL {?property sh:minCount ?min}
+    OPTIONAL {?property sh:maxCount ?max} 
+    }
+}
+"""

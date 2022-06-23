@@ -1,4 +1,5 @@
 import argparse
+from plantuml import PlantUML
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 from rdflib.graph import Graph
@@ -112,19 +113,25 @@ def main(args):
     template = env.get_template("template.md.jinja")
     puml_template = env.get_template("diagram.puml.jinja")
 
+    output_dir = "./"
+
     print(
         puml_template.render(
             namespaces=namespaces,
             classes=classes,
         ),
-        file=open("output.puml", "w"),
+        file=open(output_dir +"./diagram.puml", "w"),
     )
+
+    pl = PlantUML("http://www.plantuml.com/plantuml/img/")
+    pl.processes_file(output_dir + "/diagram.puml", directory=output_dir)
 
     print(
         template.render(
             doc=doc,
             namespaces=namespaces,
             classes=classes,
+            diagram=output_dir + "/diagram.png"
         )
     )
 
