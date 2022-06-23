@@ -102,14 +102,27 @@ def main(args):
         autoescape=select_autoescape(),
         trim_blocks=True,
     )
-    template = env.get_template("template.md.jinja")
+    
     lang = args.language
-    # print(lang)
+    doc=get_doc(g, lang)
+    namespaces=g.namespace_manager.namespaces()
+    classes=list(get_classes(g, lang=lang))
+
+    #print puml
+    template = env.get_template("template.md.jinja")
+    puml_template = env.get_template("diagram.puml.jinja")
+
+ 
+    print(puml_template.render(
+        namespaces=namespaces,
+        classes=classes,
+    ), file=open('output.puml', 'w'))
+
     print(
         template.render(
-            doc=get_doc(g, lang),
-            namespaces=g.namespace_manager.namespaces(),
-            classes=list(get_classes(g, lang=lang)),
+            doc=doc,
+            namespaces= namespaces,
+            classes=classes,
         )
     )
 

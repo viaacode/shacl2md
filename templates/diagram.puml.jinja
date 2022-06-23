@@ -1,0 +1,37 @@
+@startuml
+skinparam classFontSize 14
+!define LIGHTORANGE
+skinparam componentStyle uml2
+skinparam wrapMessageWidth 100
+skinparam ArrowColor #Maroon
+' Remove shadows
+skinparam shadowing false
+
+{# legend top right
+{% for prefix, ns in namespaces %}
+{{prefix}}: {{ns}}
+{% endfor %}
+endlegend #}
+
+{% for class in classes %}
+class "{{class.label}}" as {{class.shortname|replace(":","_")}}
+{% for superclass in class.superclasses %}
+{{class.shortname|replace(":","_")}} --|> {{superclass.shortname|replace(":","_")}} 
+{% endfor %}
+
+{% for property in class.properties %}
+{% if 'classtype' in property %}
+{{class.shortname|replace(":","_")}} --> {{property.classtype.shortname|replace(":","_")}} : {{property.shortname}} [{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]
+{% elif 'datatype' in property %}
+{{class.shortname|replace(":","_")}} : <b>{{property.shortname}}</b> : {{property.datatype.shortname}} [{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]
+{% endif %}
+{% endfor %}
+
+{% endfor %}
+
+hide circle
+hide methods
+hide empty members
+@enduml
+
+
