@@ -45,10 +45,12 @@ SELECT DISTINCT ?iri ?label ?description
 WHERE { 
     ?iri   rdfs:subClassOf ?parent ; 
         a rdfs:Class;
-        rdfs:label ?label;
-        rdfs:comment ?description.
-        FILTER(lang(?label) = ?lang)
+        rdfs:label ?label.
+    FILTER(lang(?label) = ?lang)
+    OPTIONAL { 
+        ?iri rdfs:comment ?description. 
         FILTER(lang(?description) = ?lang)
+    }
 
 }
 ORDER BY ?label
@@ -60,10 +62,12 @@ SELECT DISTINCT ?iri ?label ?description
 WHERE { 
     ?child   rdfs:subClassOf ?iri . 
     ?iri a rdfs:Class;
-        rdfs:label ?label;
-        rdfs:comment ?description.
-        FILTER(lang(?label) = ?lang)
+        rdfs:label ?label.
+    FILTER(lang(?label) = ?lang)
+    OPTIONAL { 
+        ?iri rdfs:comment ?description. 
         FILTER(lang(?description) = ?lang)
+    }
 }
 ORDER BY ?label
 """
