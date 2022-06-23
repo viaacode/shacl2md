@@ -5,7 +5,6 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 from rdflib.graph import Graph
 from rdflib.namespace import Namespace
 from rdflib.term import Literal
-from util import to_label, to_shortname
 
 from queries import (
     GET_AUTHORS,
@@ -18,6 +17,8 @@ from queries import (
 
 SHACL = Namespace("http://www.w3.org/ns/shacl#")
 
+def to_shortname(g, term):
+    return term.n3(g.namespace_manager)
 
 def get_doc(g, lang):
     for row in g.query(GET_DOC_MD, initBindings={"lang": Literal(lang)}):
@@ -32,7 +33,7 @@ def get_superclasses(g, c, lang):
         yield {
             "iri": parent.iri,
             "shortname": to_shortname(g, parent.iri),
-            "label": to_label(g, parent.iri),
+            "label": parent.label,
             "description": parent.description,
             "properties": list(get_properties(g, parent.iri, lang)),
         }
@@ -45,7 +46,7 @@ def get_subclasses(g, c, lang):
         yield {
             "iri": child.iri,
             "shortname": to_shortname(g, child.iri),
-            "label": to_label(g, child.iri),
+            "label": child.label,
             "description": child.description,
         }
 
@@ -55,7 +56,7 @@ def get_classes(g, lang):
         yield {
             "iri": c.iri,
             "shortname": to_shortname(g, c.iri),
-            "label": to_label(g, c.iri),
+            "label": c.label,
             "description": c.description,
             "properties": list(get_properties(g, c.iri, lang)),
             "superclasses": list(get_superclasses(g, c.iri, lang)),
@@ -71,14 +72,14 @@ def get_properties(g, c, lang):
         result = {
             "iri": row.iri,
             "shortname": to_shortname(g, row.iri),
-            "label": to_label(g, row.iri),
+            "label": row.label,
             "description": row.description,
             "min": row.min,
             "max": row.max,
         }
         if row.get("datatype"):
             result["datatype"] = {
-                "label": to_label(g, row.datatype),
+                "label": row.datatype_label,
                 "iri": row.datatype,
                 "shortname": to_shortname(g, row.datatype),
             }

@@ -14,7 +14,10 @@ skinparam shadowing false
 endlegend #}
 
 {% for class in classes %}
-class "{{class.label}}" as {{class.shortname|replace(":","_")}}
+class "{{class.label}} ({{class.shortname}})" as {{class.shortname|replace(":","_")}}
+{% endfor %}
+
+{% for class in classes %}
 {% for superclass in class.superclasses %}
 {{class.shortname|replace(":","_")}} --|> {{superclass.shortname|replace(":","_")}} 
 {% endfor %}
