@@ -1,11 +1,13 @@
 @startuml
+!theme vibrant
 skinparam classFontSize 14
 !define LIGHTORANGE
 skinparam componentStyle uml2
 skinparam wrapMessageWidth 100
-skinparam ArrowColor #Maroon
+' skinparam ArrowColor #Maroon
 ' Remove shadows
 skinparam shadowing false
+'skinparam linetype polyline
 
 {# legend top right
 {% for prefix, ns in namespaces %}
@@ -14,19 +16,19 @@ skinparam shadowing false
 endlegend #}
 
 {% for class in classes %}
-class "{{class.label}} ({{class.shortname}})" as {{class.shortname|replace(":","_")}}
+class "<b>{{class.label}}</b> ({{class.shortname}})" as {{class.shortname|replace(":","_")}}
 {% endfor %}
 
 {% for class in classes %}
 {% for superclass in class.superclasses %}
-{{class.shortname|replace(":","_")}} --|> {{superclass.shortname|replace(":","_")}} 
+{{class.shortname|replace(":","_")}} --|> {{superclass.shortname|replace(":","_")}} #blue;line.dotted;text:blue
 {% endfor %}
 
 {% for property in class.properties %}
 {% if 'classtype' in property %}
-{{class.shortname|replace(":","_")}} --> {{property.classtype.shortname|replace(":","_")}} : {{property.shortname}} [{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]
+{{class.shortname|replace(":","_")}} --> "[{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]" {{property.classtype.shortname|replace(":","_")}} : {{property.shortname}} >
 {% elif 'datatype' in property %}
-{{class.shortname|replace(":","_")}} : <b>{{property.shortname}}</b> : {{property.datatype.shortname}} [{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]
+{{class.shortname|replace(":","_")}} : {{property.shortname}} : <i>{{property.datatype.shortname}}</i> [{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]
 {% endif %}
 {% endfor %}
 

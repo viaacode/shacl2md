@@ -29,9 +29,11 @@ GET_CLASSES = """
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 SELECT DISTINCT ?iri ?label ?description
 WHERE {
-    ?iri a rdfs:Class;
-        rdfs:label ?label.
-    FILTER(lang(?label) = ?lang)
+    ?iri a rdfs:Class.
+    OPTIONAL { 
+        ?iri rdfs:label ?label. 
+     FILTER(lang(?label) = ?lang)
+    }
     OPTIONAL { 
         ?iri rdfs:comment ?description. 
         FILTER(lang(?description) = ?lang)
@@ -44,9 +46,11 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 SELECT DISTINCT ?iri ?label ?description
 WHERE { 
     ?iri   rdfs:subClassOf ?parent ; 
-        a rdfs:Class;
-        rdfs:label ?label.
-    FILTER(lang(?label) = ?lang)
+        a rdfs:Class.
+    OPTIONAL { 
+        ?iri rdfs:label ?label. 
+     FILTER(lang(?label) = ?lang)
+    }
     OPTIONAL { 
         ?iri rdfs:comment ?description. 
         FILTER(lang(?description) = ?lang)
@@ -61,9 +65,11 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 SELECT DISTINCT ?iri ?label ?description
 WHERE { 
     ?child   rdfs:subClassOf ?iri . 
-    ?iri a rdfs:Class;
-        rdfs:label ?label.
-    FILTER(lang(?label) = ?lang)
+    ?iri a rdfs:Class.
+    OPTIONAL { 
+        ?iri rdfs:label ?label. 
+        FILTER(lang(?label) = ?lang)
+    }
     OPTIONAL { 
         ?iri rdfs:comment ?description. 
         FILTER(lang(?description) = ?lang)
@@ -75,13 +81,27 @@ ORDER BY ?label
 GET_PROPERTIES = """
 PREFIX sh: <http://www.w3.org/ns/shacl#>
 PREFIX schema: <http://schema.org/>
-SELECT ?targetClass ?subjectclassNode ?iri ?label ?datatype ?datatype_label ?classtype ?classtype_label ?min ?max ?description (GROUP_CONCAT(?thesaurusitem;separator=", ") AS ?thesaurus)
+SELECT ?iri ?label ?datatype ?datatype_label ?classtype ?classtype_label ?min ?max ?description (GROUP_CONCAT(?thesaurusitem;separator=", ") AS ?thesaurus)
 WHERE {
     ?subjectclassNode sh:targetClass ?targetClass .
     ?subjectclassNode sh:property ?property.
-    ?property sh:path ?iri;
-            sh:name ?label .
-    FILTER(lang(?label) = ?lang)
+    ?property sh:path ?iri.
+
+    OPTIONAL {
+        ?property sh:name ?shname
+        FILTER(lang(?shname) = ?lang) 
+    }
+    OPTIONAL {
+        ?iri rdfs:label ?rdfslabel
+        FILTER(lang(?rdfslabel) = ?lang) 
+    }
+    BIND (
+        COALESCE(
+            IF(bound(?shname), ?shname, 1/0),
+            IF(bound(?rdfslabel), ?rdfslabel, 1/0)
+        ) AS ?label
+    )
+            
     OPTIONAL {?iri rdfs:comment ?rdfsdescription
         FILTER(lang(?rdfsdescription) = ?lang) 
     }
