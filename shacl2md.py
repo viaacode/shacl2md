@@ -17,8 +17,10 @@ from queries import (
 
 SHACL = Namespace("http://www.w3.org/ns/shacl#")
 
+
 def to_shortname(g, term):
     return term.n3(g.namespace_manager)
+
 
 def get_doc(g, lang):
     for row in g.query(GET_DOC_MD, initBindings={"lang": Literal(lang)}):
@@ -115,26 +117,30 @@ def main(args):
     puml_template = env.get_template("diagram.puml.jinja")
 
     output_dir = args.out
+    puml_filename = f"{args.name}-diagram.puml"
+    svg_filename = f"{args.name}-diagram.svg"
 
     print(
         puml_template.render(
             namespaces=namespaces,
             classes=classes,
         ),
-        file=open(output_dir + f"/{args.name}-diagram.puml", "w"),
+        file=open(f"{output_dir}/{puml_filename}", "w"),
     )
 
-    pl = PlantUML("http://www.plantuml.com/plantuml/img/")
-    pl.processes_file(output_dir + f"/{args.name}-diagram.puml", directory=output_dir)
+    pl = PlantUML("http://www.plantuml.com/plantuml/svg/")
+    pl.processes_file(
+        f"{output_dir}/{puml_filename}", directory=output_dir, outfile=svg_filename
+    )
 
     print(
         template.render(
             doc=doc,
             namespaces=namespaces,
             classes=classes,
-            diagram=output_dir + f"/{args.name}-diagram.png"
+            diagram=f"{output_dir}/{svg_filename}",
         ),
-        file=open(output_dir + f"/{args.name}.md", "w"),
+        file=open(f"{output_dir}/{args.name}.md", "w"),
     )
 
 

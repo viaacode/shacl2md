@@ -41,7 +41,7 @@
 {% endfor %}
 
 {% for class in classes %}
-## <a name="{{class.shortname|lower|urlencode}}">{{class.label}}</a>
+## <a id="{{class.shortname|lower|urlencode}}">{{class.label}}</a>
 
 **URI:** [{{class.shortname}}]({{class.iri}}) <br>
 {% if class.superclasses is defined and class.superclasses|length > 0 %}
@@ -64,10 +64,10 @@
 | :------ | :----- | :---------- | :---------- | :------- |
 {% for property in class.properties %}
 {% if property.datatype is defined %}
-| <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.shortname}}]({{property.iri}}) | {{property.description}} | `[{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]` | [{{property.datatype.shortname}}]({{property.datatype.iri}}) {% if property.datatype.thesaurus is defined %} Mogelijke waarden: {{property.datatype.thesaurus}} {% endif %} | 
+| <a id='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.shortname}}]({{property.iri}}) | {{property.description}} | `[{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]` | [{{property.datatype.shortname}}]({{property.datatype.iri}}) {% if property.datatype.thesaurus is defined %} Mogelijke waarden: {{property.datatype.thesaurus}} {% endif %} | 
 {% endif %}
 {% if property.classtype is defined %}
-| <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.shortname}}]({{property.iri}}) | {{property.description}} | `[{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]` | [{{property.classtype.shortname}}](#{{property.classtype.shortname|lower|urlencode}}) |
+| <a id='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.shortname}}]({{property.iri}}) | {{property.description}} | `[{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]` | [{{property.classtype.shortname}}](#{{property.classtype.shortname|lower|urlencode}}) |
 {% endif %}
 {% endfor %}
 {% endif %}

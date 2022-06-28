@@ -16,7 +16,7 @@ skinparam shadowing false
 endlegend #}
 
 {% for class in classes %}
-class "<b>{{class.label}}</b> ({{class.shortname}})" as {{class.shortname|replace(":","_")}}
+class "<b>{{class.label}}</b> ({{class.shortname}})" as {{class.shortname|replace(":","_")}} [[#{{class.shortname|lower|urlencode}}]]
 {% endfor %}
 
 {% for class in classes %}
@@ -26,9 +26,9 @@ class "<b>{{class.label}}</b> ({{class.shortname}})" as {{class.shortname|replac
 
 {% for property in class.properties %}
 {% if 'classtype' in property %}
-{{class.shortname|replace(":","_")}} --> "[{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]" {{property.classtype.shortname|replace(":","_")}} : {{property.shortname}} >
+{{class.shortname|replace(":","_")}} --> "[{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]" {{property.classtype.shortname|replace(":","_")}} : {{property.label}} >
 {% elif 'datatype' in property %}
-{{class.shortname|replace(":","_")}} : {{property.shortname}} : <i>{{property.datatype.shortname}}</i> [{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]
+{{class.shortname|replace(":","_")}} : {{property.label}} : <i>{{property.datatype.shortname}}</i> [{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]
 {% endif %}
 {% endfor %}
 
