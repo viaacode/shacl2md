@@ -1,0 +1,47 @@
+@startuml
+!theme vibrant
+skinparam classFontSize 14
+!define LIGHTORANGE
+skinparam componentStyle uml2
+skinparam wrapMessageWidth 100
+' skinparam ArrowColor #Maroon
+' Remove shadows
+skinparam shadowing false
+'skinparam linetype polyline
+skinparam ArrowMessageAlignment left
+
+{# legend top right
+{% for prefix, ns in namespaces %}
+{{prefix}}: {{ns}}
+{% endfor %}
+endlegend #}
+
+{% for class in classes %}
+class "<b>{{class.label}}</b> ({{class.shortname}})" as {{class.shortname|replace(":","_")}} [[#{{class.shortname|lower|urlencode}}]]
+{% endfor %}
+
+{% for class in classes %}
+{% for superclass in class.superclasses %}
+{{class.shortname|replace(":","_")}} --|> {{superclass.shortname|replace(":","_")}} #blue;line.dotted;text:blue
+{% endfor %}
+
+{% for property in class.properties %}
+{# Print attributes #}
+{% if property.datatypes|selectattr("type", "equalto", "datatype")| list| length > 0 %}
+{{class.shortname|replace(":","_")}} : {{property.label}} : <i>{% for datatype in property.datatypes|selectattr("type", "equalto", "datatype") %}{% if loop.index > 1 %} | {% endif %}{{datatype.shortname}}{% endfor %}</i> [{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]
+{% endif %}
+
+{# Print relations #}
+{% for datatype in property.datatypes|selectattr("type", "equalto", "class") %}
+{{class.shortname|replace(":","_")}} --> "[{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]" {{datatype.shortname|replace(":","_")}} : {{property.label}} >
+{% endfor %}
+{% endfor %}
+
+{% endfor %}
+
+hide circle
+hide methods
+hide empty members
+@enduml
+
+

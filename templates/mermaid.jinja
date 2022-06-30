@@ -1,0 +1,24 @@
+classDiagram
+{% for class in classes %}
+class {{class.label|lower|replace(" ", "_")|replace("-", "_")}}
+
+{% if class.superclasses|length > 0 %}
+{% for superclass in class.superclasses %}
+{{class.label|lower|replace(" ", "_")}} --|> {{superclass.label|lower|replace(" ", "_")}}
+{% endfor %}
+{% endif %}
+{% if class.properties|length > 0 %}
+{% for property in properties %}
+{{class.label|lower|replace(" ", "_")}} : {{property.datatype.label}} {{property.label}} 
+{% endfor %}
+{#{% for classtype_label, properties in class.properties|groupby('classtype.label', default="None") -%}
+{% if classtype_label != "None" %}
+{{class.label}} "1" --> "*" {{classtype_label}} : {{properties|join("/", attribute="label")}}
+{% else %}
+{% for property in properties %}
+{{class.label}} : {{property.datatype.label}} {{property.label}} 
+{% endfor %}
+{% endif %}
+{% endfor %}#}
+{% endif %} 
+{% endfor %} 

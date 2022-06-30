@@ -1,36 +1,29 @@
 {{doc.title}}
 ====================
 
+**Version:** {{doc.version}}
+
+**Prior version:** {{doc.prior_version}}
+
+**Created:** {{doc.created}}
+
+**Last modified:** {{doc.modified}}
+
 **Authors:**
 {% for author in doc.authors %}
-- [{{author.label}}](mailto:{{author.email}})
+{% if loop.index > 1 %}, {% endif %}[{{author.label}}](mailto:{{author.email}})
 {% endfor %}
 
-**Version:** {{doc.version}}
-**Prior version:** {{doc.prior_version}}
-**Created:** {{doc.created}}
-**Last modified:** {{doc.modified}}
+
 
 {{doc.description}}
 
-```mermaid
-classDiagram
-{% for class in classes %}
-class {{class.label}}
-{% if class.properties|length > 0%}
-{% for classtype_label, properties in class.properties|groupby('classtype.label', default="None") -%}
-{% if classtype_label != "None" %}
-{{class.label}} --> {{classtype_label}} : {{properties|join("/", attribute="label")}}
-{% else %}
-{% for property in properties %}
-{{class.label}} : {{property.datatype.label}} {{property.label}} 
-{% endfor %}
-{% endif %}
-{% endfor %}
-{% endif %}
-{% endfor %}
+{# ```mermaid
+{% include 'mermaid.jinja' %}
 ```
-{% raw %}{% include mermaid.html %}{% endraw %}
+{% raw %}{% include mermaid.html %}{% endraw %} #}
+
+![]({{diagram}})
 
 ## Namespaces
 
@@ -48,34 +41,31 @@ class {{class.label}}
 {% endfor %}
 
 {% for class in classes %}
-## <a name="{{class.shortname|lower|urlencode}}"> Class: {{class.label}} </a>
-**{{class.shortname}}** <br>
+## <a id="{{class.shortname|lower|urlencode}}">{{class.label}}</a>
+
 **URI:** [{{class.shortname}}]({{class.iri}}) <br>
 {% if class.superclasses is defined and class.superclasses|length > 0 %}
+
 **Subclass of:** 
 {% for parent in class.superclasses %}
 [{{parent.shortname}}](#{{parent.shortname|lower|urlencode}})
 {% endfor %}
 {% endif %}
 {% if class.subclasses is defined and class.subclasses|length > 0%}
+
 **Subclasses:** 
 {% for child in class.subclasses %}
 {% if loop.index > 1 %}, {% endif %}[{{child.shortname}}](#{{child.shortname|lower|urlencode}})
 {% endfor %}
 {% endif %}
 
-{{class.description}}
+{{class.description if class.description is not none }}
 
 {% if class.properties|length > 0%}
-| Property | URI   | Description | Datatype | Min | Max |
-| :------ | :----- | :---------- | :------- | :-- | :-- |
+| Property | URI   | Description | Cardinality | Datatype |
+| :------ | :----- | :---------- | :---------- | :------- |
 {% for property in class.properties %}
-{% if property.datatype is defined %}
-| <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.shortname}}]({{property.iri}}) | {{property.description}} | [{{property.datatype.shortname}}]({{property.datatype.iri}}) {% if property.datatype.thesaurus is defined %} Mogelijke waarden: {{property.datatype.thesaurus}} {% endif %} | {% if property.min != None %} {{property.min}} {% endif %} | {% if property.max != None %} {{property.max}} {% endif %} |
-{% endif %}
-{% if property.classtype is defined %}
-| <a name='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.shortname}}]({{property.iri}}) | {{property.description}} | [{{property.classtype.shortname}}](#{{property.classtype.shortname|lower|urlencode}}) | {% if property.min != None %} {{property.min}} {% endif %} | {% if property.max != None %} {{property.max}} {% endif %} |
-{% endif %}
+| <a id='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.shortname}}]({{property.iri}}) | {{property.description if property.description is not none}} | `[{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]` | {% for datatype in property.datatypes -%}{% if loop.index > 1 %} \| {% endif %}{% if datatype.type == "class" %}[{{datatype.label}}](#{{datatype.shortname|lower|urlencode}}){% else %}[`{{datatype.shortname}}`]({{datatype.iri}}){% endif %}{% endfor %} |
 {% endfor %}
 {% endif %}
 
