@@ -13,6 +13,8 @@ from queries import (
     GET_PROPERTIES,
     GET_SUBCLASSES,
     GET_SUPERCLASSES,
+    GET_DATATYPES,
+    GET_VALUES,
 )
 
 SHACL = Namespace("http://www.w3.org/ns/shacl#")
@@ -66,6 +68,26 @@ def get_classes(g, lang):
         }
 
 
+def get_datatypes(g, s, lang):
+    for dt in g.query(
+        GET_DATATYPES, initBindings={"lang": Literal(lang), "shape": s}
+    ):
+        yield {
+            "iri": dt.iri,
+            "label": dt.label,
+            "shortname": to_shortname(g, dt.iri),
+            "type": dt.type.toPython(),
+        }
+
+def get_values(g, s, lang):
+    for dt in g.query(GET_VALUES, initBindings={"lang": Literal(lang), "shape": s}):
+        yield {
+            "iri": dt.iri,
+            "label": dt.label,
+            "shortname": to_shortname(g, dt.iri),
+        }
+
+
 def get_properties(g, c, lang):
     qres = g.query(
         GET_PROPERTIES, initBindings={"lang": Literal(lang), "targetClass": c}
@@ -78,22 +100,9 @@ def get_properties(g, c, lang):
             "description": row.description,
             "min": row.min,
             "max": row.max,
+            "datatypes": list(get_datatypes(g, row.shape, lang)),
+            # "values": list(get_values(g, row.shape, lang))
         }
-        if row.get("datatype"):
-            result["datatype"] = {
-                "label": row.datatype_label,
-                "iri": row.datatype,
-                "shortname": to_shortname(g, row.datatype),
-            }
-            if bool(row.thesaurus):
-                result["thesaurus"] = row.thesaurus
-
-        elif row.get("classtype"):
-            result["classtype"] = {
-                "label": row.classtype_label,
-                "iri": row.classtype,
-                "shortname": to_shortname(g, row.classtype),
-            }
         yield result
 
 

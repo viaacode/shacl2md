@@ -29,7 +29,12 @@ GET_CLASSES = """
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 SELECT DISTINCT ?iri ?label ?description
 WHERE {
-    ?iri a rdfs:Class.
+    {
+        ?subjectclassNode sh:targetClass ?iri . 
+    } UNION {
+        ?property sh:or*/rdf:rest*/rdf:first*/sh:class ?iri .
+    }
+
     OPTIONAL { 
         ?iri rdfs:label ?label. 
      FILTER(lang(?label) = ?lang)
@@ -81,14 +86,15 @@ ORDER BY ?label
 GET_PROPERTIES = """
 PREFIX sh: <http://www.w3.org/ns/shacl#>
 PREFIX schema: <http://schema.org/>
-SELECT ?iri ?label ?datatype ?datatype_label ?classtype ?classtype_label ?min ?max ?description (GROUP_CONCAT(?thesaurusitem;separator=", ") AS ?thesaurus)
+SELECT DISTINCT ?shape ?iri ?label ?description ?min ?max
 WHERE {
     ?subjectclassNode sh:targetClass ?targetClass .
-    ?subjectclassNode sh:property ?property.
-    ?property sh:path ?iri.
+    ?subjectclassNode sh:property ?shape.
+    ?shape sh:path ?iri.
 
+    # Label
     OPTIONAL {
-        ?property sh:name ?shname
+        ?shape sh:name ?shname
         FILTER(lang(?shname) = ?lang) 
     }
     OPTIONAL {
@@ -101,12 +107,13 @@ WHERE {
             IF(bound(?rdfslabel), ?rdfslabel, 1/0)
         ) AS ?label
     )
-            
+
+    # Description  
+    OPTIONAL {?shape sh:description ?shacldescription
+        FILTER(lang(?shacldescription) = ?lang) 
+    }
     OPTIONAL {?iri rdfs:comment ?rdfsdescription
         FILTER(lang(?rdfsdescription) = ?lang) 
-    }
-    OPTIONAL {?property sh:description ?shacldescription
-        FILTER(lang(?shacldescription) = ?lang) 
     }
     BIND (
         COALESCE(
@@ -114,60 +121,60 @@ WHERE {
             IF(bound(?rdfsdescription), ?rdfsdescription, 1/0)
         ) AS ?description
     )
-    OPTIONAL {?property sh:minCount ?min}
-    OPTIONAL {?property sh:maxCount ?max}
-    OPTIONAL {?property sh:datatype ?datatype .
-       OPTIONAL{?datatype rdfs:label ?datatype_label} }
-    OPTIONAL {?property sh:or*/rdf:rest*/rdf:first*/sh:class ?classtype .
-       OPTIONAL{?classtype rdfs:label ?classtype_label .
-       FILTER(lang(?classtype_label) = ?lang)} }
-    OPTIONAL {?property sh:in ?thesaurusnode .
-       OPTIONAL{?thesaurusnode rdf:rest*/rdf:first ?thesaurusitem} }
+
+    # Cardinality
+    OPTIONAL {?shape sh:minCount ?min}
+    OPTIONAL {?shape sh:maxCount ?max}
+
+    # Datatype
+    #OPTIONAL {
+    #    ?shape sh:or*/rdf:rest*/rdf:first*/sh:datatype ?datatype .
+    #    OPTIONAL {
+    #        ?datatype rdfs:label ?datatype_label
+    #        FILTER(lang(?datatype_label) = ?lang)
+    #    }
+    #}
+
+    # Class
+    #OPTIONAL {
+    #    ?shape sh:or*/rdf:rest*/rdf:first*/sh:class ?classtype .
+    #    OPTIONAL {
+    #        ?classtype rdfs:label ?classtype_label
+    #        FILTER(lang(?classtype_label) = ?lang)
+    #    }
+    #}
 }
-GROUP BY ?targetClass ?subjectclassNode ?iri ?label ?datatype ?datatype_label ?classtype ?classtype_label ?min ?max ?description
 ORDER BY ?label
 """
 
+GET_DATATYPES = """
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+SELECT DISTINCT ?iri ?label ?type
+WHERE {
+    {
+        ?shape sh:or*/rdf:rest*/rdf:first*/sh:datatype ?iri .
+        OPTIONAL {
+            ?iri rdfs:label ?label
+            FILTER(lang(?label) = ?lang)
+        }
+        BIND("datatype" AS ?type)
+    } UNION {
+        ?shape sh:or*/rdf:rest*/rdf:first*/sh:class ?iri .
+        OPTIONAL {
+            ?iri rdfs:label ?label
+            FILTER(lang(?label) = ?lang)
+        }
+        BIND("class" AS ?type)
+    }
+}
+"""
 
-GET_ATTRIBUTES = """
+GET_VALUES = """
 PREFIX sh: <http://www.w3.org/ns/shacl#>
 PREFIX schema: <http://schema.org/>
-SELECT DISTINCT ?targetClass ?subjectclassNode ?iri ?label ?datatype ?datatype_label ?min ?max ?description
+SELECT ?value
 WHERE {
-    ?subjectclassNode sh:targetClass ?targetClass;
-                      sh:property ?property.
-    ?property sh:path ?iri;
-              sh:datatype ?datatype .
-
-    OPTIONAL{ ?datatype rdfs:label ?datatype_label}
-
-    OPTIONAL {?property sh:name ?shname
-        FILTER(lang(?shname) = ?lang) 
-    }
-    OPTIONAL {?property rdfs:label ?rdfslabel
-        FILTER(lang(?rdfslabel) = ?lang) 
-    }
-    BIND (
-        COALESCE(
-            IF(bound(?shname), ?shname, 1/0),
-            IF(bound(?rdfslabel), ?rdfslabel, 1/0)
-        ) AS ?label
-    )
-
-    OPTIONAL {?iri rdfs:comment ?rdfsdescription
-        FILTER(lang(?rdfsdescription) = ?lang) 
-    }
-    OPTIONAL {?property sh:description ?shacldescription
-        FILTER(lang(?shacldescription) = ?lang) 
-    }
-    BIND (
-        COALESCE(
-            IF(bound(?shacldescription), ?shacldescription, 1/0),
-            IF(bound(?rdfsdescription), ?rdfsdescription, 1/0)
-        ) AS ?description
-    )
-    OPTIONAL {?property sh:minCount ?min}
-    OPTIONAL {?property sh:maxCount ?max} 
-    }
+    ?shape sh:in ?n .
+    OPTIONAL{?n rdf:rest*/rdf:first ?value} 
 }
 """
