@@ -45,12 +45,14 @@
 
 **URI:** [{{class.shortname}}]({{class.iri}}) <br>
 {% if class.superclasses is defined and class.superclasses|length > 0 %}
+
 **Subclass of:** 
 {% for parent in class.superclasses %}
 [{{parent.shortname}}](#{{parent.shortname|lower|urlencode}})
 {% endfor %}
 {% endif %}
 {% if class.subclasses is defined and class.subclasses|length > 0%}
+
 **Subclasses:** 
 {% for child in class.subclasses %}
 {% if loop.index > 1 %}, {% endif %}[{{child.shortname}}](#{{child.shortname|lower|urlencode}})
@@ -63,12 +65,7 @@
 | Property | URI   | Description | Cardinality | Datatype |
 | :------ | :----- | :---------- | :---------- | :------- |
 {% for property in class.properties %}
-{% if property.datatype is defined %}
-| <a id='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.shortname}}]({{property.iri}}) | {{property.description if property.description is not none}} | `[{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]` | [{{property.datatype.shortname}}]({{property.datatype.iri}}) {% if property.datatype.thesaurus is defined %} Mogelijke waarden: {{property.datatype.thesaurus}} {% endif %} | 
-{% endif %}
-{% if property.classtype is defined %}
-| <a id='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.shortname}}]({{property.iri}}) | {{property.description if property.description is not none}} | `[{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]` | [{{property.classtype.label}}](#{{property.classtype.shortname|lower|urlencode}}) |
-{% endif %}
+| <a id='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.shortname}}]({{property.iri}}) | {{property.description if property.description is not none}} | `[{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]` | {% for datatype in property.datatypes -%}{% if loop.index > 1 %} \| {% endif %}{% if datatype.type == "class" %}[{{datatype.label}}](#{{datatype.shortname|lower|urlencode}}){% else %}[`{{datatype.shortname}}`]({{datatype.iri}}){% endif %}{% endfor %} |
 {% endfor %}
 {% endif %}
 

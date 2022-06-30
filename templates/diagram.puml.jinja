@@ -26,11 +26,15 @@ class "<b>{{class.label}}</b> ({{class.shortname}})" as {{class.shortname|replac
 {% endfor %}
 
 {% for property in class.properties %}
-{% if 'classtype' in property %}
-{{class.shortname|replace(":","_")}} --> "[{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]" {{property.classtype.shortname|replace(":","_")}} : {{property.label}} >
-{% elif 'datatype' in property %}
-{{class.shortname|replace(":","_")}} : {{property.label}} : <i>{{property.datatype.shortname}}</i> [{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]
+{# Print attributes #}
+{% if property.datatypes|selectattr("type", "equalto", "datatype")| list| length > 0 %}
+{{class.shortname|replace(":","_")}} : {{property.label}} : <i>{% for datatype in property.datatypes|selectattr("type", "equalto", "datatype") %}{% if loop.index > 1 %} | {% endif %}{{datatype.shortname}}{% endfor %}</i> [{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]
 {% endif %}
+
+{# Print relations #}
+{% for datatype in property.datatypes|selectattr("type", "equalto", "class") %}
+{{class.shortname|replace(":","_")}} --> "[{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]" {{datatype.shortname|replace(":","_")}} : {{property.label}} >
+{% endfor %}
 {% endfor %}
 
 {% endfor %}
