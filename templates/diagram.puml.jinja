@@ -17,7 +17,7 @@ skinparam ArrowMessageAlignment left
 endlegend #}
 
 {% for class in classes %}
-class "<b>{{class.label}}</b> ({{class.shortname}})" as {{class.shortname|replace(":","_")}} [[#{{class.shortname|lower|urlencode}}]]
+class "<b>{{class.label}}</b> ({{class.shortname}})" as {{class.shortname|replace(":","_")}} [[#{{class.shortname|urlencode}}]]
 {% endfor %}
 
 {% for class in classes %}
