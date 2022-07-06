@@ -40,6 +40,7 @@ def get_superclasses(g, c, lang):
             "label": parent.label,
             "description": parent.description,
             "properties": list(get_properties(g, parent.iri, lang)),
+            # "superclasses": list(get_superclasses(g, parent.iri, lang)),
         }
 
 
@@ -69,15 +70,14 @@ def get_classes(g, lang):
 
 
 def get_datatypes(g, s, lang):
-    for dt in g.query(
-        GET_DATATYPES, initBindings={"lang": Literal(lang), "shape": s}
-    ):
+    for dt in g.query(GET_DATATYPES, initBindings={"lang": Literal(lang), "shape": s}):
         yield {
             "iri": dt.iri,
             "label": dt.label,
             "shortname": to_shortname(g, dt.iri),
             "type": dt.type.toPython(),
         }
+
 
 def get_values(g, s, lang):
     for dt in g.query(GET_VALUES, initBindings={"lang": Literal(lang), "shape": s}):
@@ -144,10 +144,16 @@ def main(args):
 
     print(
         template.render(
+            frontmatter={
+                "layout": args.layout,
+                "title": doc.title,
+                "parent": args.parent,
+                "nav_order": args.nav_order,
+            },
             doc=doc,
             namespaces=namespaces,
             classes=classes,
-            diagram=f"{output_dir}/{svg_filename}",
+            diagram=f"./{svg_filename}",
         ),
         file=open(f"{output_dir}/{args.name}.md", "w"),
     )
@@ -176,6 +182,30 @@ if __name__ == "__main__":
         default="./",
         required=False,
         help='output directory for files, default is "./"',
+    )
+    parser.add_argument(
+        "--parent",
+        metavar="parent",
+        type=str,
+        required=False,
+        default="index",
+        help='Jekyll parent page, default is "index"',
+    )
+    parser.add_argument(
+        "--layout",
+        metavar="layout",
+        type=str,
+        required=False,
+        default="default",
+        help='Jekyll layout, default is "default"',
+    )
+    parser.add_argument(
+        "--nav_order",
+        metavar="nav_order",
+        type=int,
+        required=False,
+        default=1,
+        help="Jekyll nav order, default is 1",
     )
     parser.add_argument(
         "--name",
