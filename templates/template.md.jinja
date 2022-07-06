@@ -1,3 +1,10 @@
+---
+{% for k, v in frontmatter.items() %}
+{{k}}: {% if v is number %}{{v}}{% else %}"{{v}}"{% endif %}
+
+{% endfor %}
+---
+
 {{doc.title}}
 ====================
 
@@ -23,7 +30,9 @@
 ```
 {% raw %}{% include mermaid.html %}{% endraw %} #}
 
-![]({{diagram}})
+
+<img src="{{diagram}}" class="zoom"/>
+
 
 ## Namespaces
 
@@ -41,9 +50,9 @@
 {% endfor %}
 
 {% for class in classes %}
-## <a id="{{class.shortname|lower|urlencode}}">{{class.label}}</a>
+## <a id="{{class.shortname|lower|urlencode}}"></a>{{class.label}} <small>[({{class.shortname}})]({{class.iri}})</small>
 
-**URI:** [{{class.shortname}}]({{class.iri}}) <br>
+{# **URI:** [{{class.shortname}}]({{class.iri}}) <br> #}
 {% if class.superclasses is defined and class.superclasses|length > 0 %}
 
 **Subclass of:** 
@@ -62,11 +71,22 @@
 {{class.description if class.description is not none }}
 
 {% if class.properties|length > 0%}
-| Property | URI   | Description | Cardinality | Datatype |
-| :------ | :----- | :---------- | :---------- | :------- |
+| Property | Description | Cardinality | Datatype |
+| :------ | :---------- | :---------- | :------- |
 {% for property in class.properties %}
-| <a id='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.shortname}}]({{property.iri}}) | {{property.description if property.description is not none}} | `[{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]` | {% for datatype in property.datatypes -%}{% if loop.index > 1 %} \| {% endif %}{% if datatype.type == "class" %}[{{datatype.label}}](#{{datatype.shortname|lower|urlencode}}){% else %}[`{{datatype.shortname}}`]({{datatype.iri}}){% endif %}{% endfor %} |
+| <a id='{{property.shortname|lower|urlencode}}'></a>{{property.label}} <br> <small>[({{property.shortname}})]({{property.iri}})</small> | {{property.description if property.description is not none}} | `[{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]` | {% for datatype in property.datatypes -%}{% if loop.index > 1 %} _or_ {% endif %}{% if datatype.type == "class" %}[{{datatype.label}}](#{{datatype.shortname|lower|urlencode}}){% else %}[`{{datatype.shortname}}`]({{datatype.iri}}){% endif %}{% endfor %} |
 {% endfor %}
 {% endif %}
 
+{% for parent in class.superclasses %}
+{% if parent.properties|length > 0 %}
+_Properties from [{{parent.label}}](#{{parent.shortname|lower|urlencode}}):_ {% for property in parent.properties %}{% if loop.index > 1 %}, {% endif %} [{{property.label}}](#{{property.shortname|lower|urlencode}}){% endfor %}
+{% endif %}
 {% endfor %}
+
+{% endfor %}
+
+<style>
+.zoom { transition: transform ease-in-out 0.2s; }
+.zoom:hover { transform: scale(3.0); }
+</style>

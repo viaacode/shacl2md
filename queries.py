@@ -1,8 +1,9 @@
 GET_DOC_MD = """
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX dct: <http://purl.org/dc/terms/>
 SELECT DISTINCT ?title ?created ?modified ?description
 WHERE { 
-    ?doc dct:title ?title.
+    ?doc dct:title ?title; a owl:Ontology.
     FILTER(lang(?title) = ?lang)
     OPTIONAL { ?doc dct:created ?created. }
     OPTIONAL { ?doc dct:modified ?modified. }
