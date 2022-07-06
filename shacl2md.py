@@ -1,4 +1,5 @@
 import argparse
+from lxml import etree 
 from plantuml import PlantUML
 
 from jinja2 import Environment, PackageLoader, select_autoescape
@@ -142,6 +143,14 @@ def main(args):
         f"{output_dir}/{puml_filename}", directory=output_dir, outfile=svg_filename
     )
 
+    parser = etree.XMLParser(ns_clean=True, remove_comments=True)
+    tree   = etree.parse(f"{output_dir}/{svg_filename}", parser)
+    tree.getroot().attrib.pop('width')
+    tree.getroot().attrib.pop('height')
+    tree.getroot().attrib.pop('style')
+    svg_text = etree.tostring(tree.getroot(), encoding='unicode', xml_declaration=False)
+
+
     print(
         template.render(
             frontmatter={
@@ -153,7 +162,8 @@ def main(args):
             doc=doc,
             namespaces=namespaces,
             classes=classes,
-            diagram=f"./{svg_filename}",
+            diagramText=svg_text,
+            #diagram=f"./{svg_filename}",
         ),
         file=open(f"{output_dir}/{args.name}.md", "w"),
     )
