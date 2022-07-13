@@ -51,14 +51,14 @@
 
 **Subclass of:** 
 {% for parent in class.superclasses %}
-[{{parent.shortname}}](#{{parent.shortname|urlencode}})
+[{{parent.label}}](#{{parent.shortname|urlencode}})
 {% endfor %}
 {% endif %}
 {% if class.subclasses is defined and class.subclasses|length > 0%}
 
 **Subclasses:** 
 {% for child in class.subclasses %}
-{% if loop.index > 1 %}, {% endif %}[{{child.shortname}}](#{{child.shortname|urlencode}})
+{% if loop.index > 1 %}, {% endif %}[{{child.label}}](#{{child.shortname|urlencode}})
 {% endfor %}
 {% endif %}
 
