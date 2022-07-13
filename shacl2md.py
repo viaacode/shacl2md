@@ -1,5 +1,5 @@
 import argparse
-from lxml import etree 
+from lxml import etree
 from plantuml import PlantUML
 
 from jinja2 import Environment, PackageLoader, select_autoescape
@@ -19,6 +19,15 @@ from queries import (
 )
 
 SHACL = Namespace("http://www.w3.org/ns/shacl#")
+
+env = Environment(
+    loader=PackageLoader("shacl2md"),
+    autoescape=select_autoescape(),
+    trim_blocks=True,
+)
+
+template = env.get_template("template.md.jinja")
+puml_template = env.get_template("diagram.puml.jinja")
 
 
 def to_shortname(g, term):
@@ -111,22 +120,18 @@ def main(args):
     g = Graph()
     for file in args.files:
         g.parse(file)
-    env = Environment(
-        loader=PackageLoader("shacl2md"),
-        autoescape=select_autoescape(),
-        trim_blocks=True,
-    )
 
+    generate(g, args)
+
+
+def generate(g, args):
     lang = args.language
+    output_dir = args.out
+
     doc = get_doc(g, lang)
     namespaces = g.namespace_manager.namespaces()
     classes = list(get_classes(g, lang=lang))
 
-    # print puml
-    template = env.get_template("template.md.jinja")
-    puml_template = env.get_template("diagram.puml.jinja")
-
-    output_dir = args.out
     puml_filename = f"{args.name}-diagram.puml"
     svg_filename = f"{args.name}-diagram.svg"
 
@@ -144,12 +149,11 @@ def main(args):
     )
 
     parser = etree.XMLParser(ns_clean=True, remove_comments=True)
-    tree   = etree.parse(f"{output_dir}/{svg_filename}", parser)
-    tree.getroot().attrib.pop('width')
-    tree.getroot().attrib.pop('height')
-    tree.getroot().attrib.pop('style')
-    svg_text = etree.tostring(tree.getroot(), encoding='unicode', xml_declaration=False)
-
+    tree = etree.parse(f"{output_dir}/{svg_filename}", parser)
+    tree.getroot().attrib.pop("width")
+    tree.getroot().attrib.pop("height")
+    tree.getroot().attrib.pop("style")
+    svg_text = etree.tostring(tree.getroot(), encoding="unicode", xml_declaration=False)
 
     print(
         template.render(
@@ -163,7 +167,7 @@ def main(args):
             namespaces=namespaces,
             classes=classes,
             diagramText=svg_text,
-            #diagram=f"./{svg_filename}",
+            # diagram=f"./{svg_filename}",
         ),
         file=open(f"{output_dir}/{args.name}.md", "w"),
     )
@@ -226,5 +230,4 @@ if __name__ == "__main__":
         help='filename for the output file, default is "output"',
     )
     argsv = parser.parse_args()
-    # print(argsv.accumulate(args.files))
     main(argsv)
