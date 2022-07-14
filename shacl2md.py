@@ -31,7 +31,7 @@ puml_template = env.get_template("diagram.puml.jinja")
 
 
 def to_shortname(g, term):
-    return term.n3(g.namespace_manager)
+    return term.n3(g.namespace_manager) if term is not None else ""
 
 
 def get_doc(g, lang):
@@ -103,6 +103,14 @@ def get_properties(g, c, lang):
         GET_PROPERTIES, initBindings={"lang": Literal(lang), "targetClass": c}
     )
     for row in qres:
+        datatypes = list(get_datatypes(g, row.shape, lang))
+        if (not len(datatypes) > 0) and row.kind == SHACL.IRI:
+            datatypes = [
+                {
+                    "iri": "https://www.rfc-editor.org/rfc/rfc3987.txt",
+                    "shortname": "IRI",
+                }
+            ]
         result = {
             "iri": row.iri,
             "shortname": to_shortname(g, row.iri),
@@ -110,13 +118,14 @@ def get_properties(g, c, lang):
             "description": row.description,
             "min": row.min,
             "max": row.max,
-            "datatypes": list(get_datatypes(g, row.shape, lang)),
+            "datatypes": datatypes
             # "values": list(get_values(g, row.shape, lang))
         }
         yield result
 
 
 def main(args):
+    # TODO: from rdflib 6.1.2, use bind_namespaces="none"
     g = Graph()
     for file in args.files:
         g.parse(file)
