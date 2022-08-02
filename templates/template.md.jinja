@@ -1,3 +1,10 @@
+---
+{% for k, v in frontmatter.items() %}
+{{k}}: {% if v is number %}{{v}}{% else %}"{{v}}"{% endif %}
+
+{% endfor %}
+---
+
 {{doc.title}}
 ====================
 
@@ -15,15 +22,11 @@
 {% endfor %}
 
 
-
 {{doc.description}}
 
-{# ```mermaid
-{% include 'mermaid.jinja' %}
-```
-{% raw %}{% include mermaid.html %}{% endraw %} #}
-
-![]({{diagram}})
+<div class="zoom">
+{{diagramText}}
+</div>
 
 ## Namespaces
 
@@ -37,36 +40,52 @@
 
 **Classes:** 
 {% for class in classes %}
-{% if loop.index > 1 %} | {% endif %} [{{class.label}}](#{{class.shortname|lower|urlencode}})
+{% if loop.index > 1 %} | {% endif %} [{{class.label}}](#{{class.shortname|urlencode}})
 {% endfor %}
 
 {% for class in classes %}
-## <a id="{{class.shortname|lower|urlencode}}">{{class.label}}</a>
+## <a id="{{class.shortname|urlencode}}"></a>{{class.label}} <small>[({{class.shortname}})]({{class.iri}})</small>
 
-**URI:** [{{class.shortname}}]({{class.iri}}) <br>
+{# **URI:** [{{class.shortname}}]({{class.iri}}) <br> #}
 {% if class.superclasses is defined and class.superclasses|length > 0 %}
 
 **Subclass of:** 
 {% for parent in class.superclasses %}
-[{{parent.shortname}}](#{{parent.shortname|lower|urlencode}})
+[{{parent.label}}](#{{parent.shortname|urlencode}})
 {% endfor %}
 {% endif %}
 {% if class.subclasses is defined and class.subclasses|length > 0%}
 
 **Subclasses:** 
 {% for child in class.subclasses %}
-{% if loop.index > 1 %}, {% endif %}[{{child.shortname}}](#{{child.shortname|lower|urlencode}})
+{% if loop.index > 1 %}, {% endif %}[{{child.label}}](#{{child.shortname|urlencode}})
 {% endfor %}
 {% endif %}
 
 {{class.description if class.description is not none }}
 
 {% if class.properties|length > 0%}
-| Property | URI   | Description | Cardinality | Datatype |
-| :------ | :----- | :---------- | :---------- | :------- |
+| Property | Description | Cardinality | Datatype |
+| :------ | :---------- | :---------- | :------- |
 {% for property in class.properties %}
-| <a id='{{property.shortname|lower|urlencode}}'>{{property.label}}</a> | [{{property.shortname}}]({{property.iri}}) | {{property.description if property.description is not none}} | `[{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]` | {% for datatype in property.datatypes -%}{% if loop.index > 1 %} \| {% endif %}{% if datatype.type == "class" %}[{{datatype.label}}](#{{datatype.shortname|lower|urlencode}}){% else %}[`{{datatype.shortname}}`]({{datatype.iri}}){% endif %}{% endfor %} |
+| <a id='{{property.shortname|urlencode}}'></a>{{property.label}} <br> <small>[({{property.shortname}})]({{property.iri}})</small> | {{property.description if property.description is not none}} | `{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}` | {% for datatype in property.datatypes -%}{% if loop.index > 1 %} _or_ {% endif %}{% if datatype.type == "class" %}[{{datatype.label}}](#{{datatype.shortname|urlencode}}){% else %}[`{{datatype.shortname}}`]({{datatype.iri}}){% endif %}{% endfor %} |
 {% endfor %}
 {% endif %}
 
+{% for parent in class.superclasses %}
+{% if parent.properties|length > 0 %}
+_Properties from [{{parent.label}}](#{{parent.shortname|urlencode}}):_ {% for property in parent.properties %}{% if loop.index > 1 %}, {% endif %} [{{property.label}}](#{{property.shortname|urlencode}}){% endfor %}
+{% endif %}
 {% endfor %}
+
+{% endfor %}
+
+<style>
+.zoom > svg {
+    width: 100%;
+    height: auto;
+    background-color: #fff;
+}
+.zoom { transition: transform ease-in-out 0.2s; }
+.zoom:hover { transform: scale(2.0); }
+</style>

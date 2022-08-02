@@ -1,8 +1,9 @@
 GET_DOC_MD = """
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
 PREFIX dct: <http://purl.org/dc/terms/>
 SELECT DISTINCT ?title ?created ?modified ?description
 WHERE { 
-    ?doc dct:title ?title.
+    ?doc dct:title ?title; a owl:Ontology.
     FILTER(lang(?title) = ?lang)
     OPTIONAL { ?doc dct:created ?created. }
     OPTIONAL { ?doc dct:modified ?modified. }
@@ -86,7 +87,7 @@ ORDER BY ?label
 GET_PROPERTIES = """
 PREFIX sh: <http://www.w3.org/ns/shacl#>
 PREFIX schema: <http://schema.org/>
-SELECT DISTINCT ?shape ?iri ?label ?description ?min ?max
+SELECT DISTINCT ?shape ?iri ?label ?description ?min ?max ?kind
 WHERE {
     ?subjectclassNode sh:targetClass ?targetClass .
     ?subjectclassNode sh:property ?shape.
@@ -126,6 +127,9 @@ WHERE {
     OPTIONAL {?shape sh:minCount ?min}
     OPTIONAL {?shape sh:maxCount ?max}
 
+    OPTIONAL {
+        ?shape sh:nodeKind ?kind
+    }
     # Datatype
     #OPTIONAL {
     #    ?shape sh:or*/rdf:rest*/rdf:first*/sh:datatype ?datatype .
@@ -149,7 +153,7 @@ ORDER BY ?label
 
 GET_DATATYPES = """
 PREFIX sh: <http://www.w3.org/ns/shacl#>
-SELECT DISTINCT ?iri ?label ?type
+SELECT DISTINCT ?iri ?label ?type ?kind
 WHERE {
     {
         ?shape sh:or*/rdf:rest*/rdf:first*/sh:datatype ?iri .
