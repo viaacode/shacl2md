@@ -90,11 +90,11 @@ def get_datatypes(g, s, lang):
 
 
 def get_values(g, s, lang):
-    for dt in g.query(GET_VALUES, initBindings={"lang": Literal(lang), "shape": s}):
+    for v in g.query(GET_VALUES, initBindings={"lang": Literal(lang), "shape": s}):
         yield {
-            "iri": dt.iri,
-            "label": dt.label,
-            "shortname": to_shortname(g, dt.iri),
+            "iri": v.iri,
+            "label": v.label,
+            "shortname": to_shortname(g, v.iri),
         }
 
 
@@ -104,6 +104,7 @@ def get_properties(g, c, lang):
     )
     for row in qres:
         datatypes = list(get_datatypes(g, row.shape, lang))
+        values = list(get_values(g, row.shape, lang))
         if (not len(datatypes) > 0) and row.kind == SHACL.IRI:
             datatypes = [
                 {
@@ -118,8 +119,8 @@ def get_properties(g, c, lang):
             "description": row.description,
             "min": row.min,
             "max": row.max,
-            "datatypes": datatypes
-            # "values": list(get_values(g, row.shape, lang))
+            "datatypes": datatypes,
+            "value_list": values
         }
         yield result
 

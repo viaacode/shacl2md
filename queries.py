@@ -176,9 +176,16 @@ WHERE {
 GET_VALUES = """
 PREFIX sh: <http://www.w3.org/ns/shacl#>
 PREFIX schema: <http://schema.org/>
-SELECT ?value
+SELECT ?iri ?label
 WHERE {
     ?shape sh:in ?n .
-    OPTIONAL{?n rdf:rest*/rdf:first ?value} 
+    OPTIONAL{
+        ?n rdf:rest*/rdf:first ?iri
+        
+        OPTIONAL {
+            ?iri rdfs:label ?label
+            FILTER(lang(?label) = ?lang)
+        }    
+    } 
 }
 """
