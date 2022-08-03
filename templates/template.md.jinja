@@ -68,7 +68,7 @@
 | Property | Description | Cardinality | Datatype |
 | :------ | :---------- | :---------- | :------- |
 {% for property in class.properties %}
-| <a id='{{property.shortname|urlencode}}'></a>{{property.label}} <br> <small>[({{property.shortname}})]({{property.iri}})</small> | {{property.description if property.description is not none}} | `{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}` | {% for datatype in property.datatypes -%}{% if loop.index > 1 %} _or_ {% endif %}{% if datatype.type == "class" %}[{{datatype.label}}](#{{datatype.shortname|urlencode}}){% else %}[`{{datatype.shortname}}`]({{datatype.iri}}){% endif %}{% endfor %} {% for value in property.value_list -%}{% if loop.index == 1 %}<br>_Possible values: {% endif %}{% if loop.index > 1 %}, {% endif %}[`{{value.shortname}}`]({{value.iri}}){% endfor %}_ |
+| <a id='{{property.shortname|urlencode}}'></a>{{property.label}} <br> <small>[({{property.shortname}})]({{property.iri}})</small> | {{property.description if property.description is not none}} | `{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}` | {% for datatype in property.datatypes -%}{% if loop.index > 1 %} _or_ {% endif %}{% if datatype.type == "class" %}[{{datatype.label}}](#{{datatype.shortname|urlencode}}){% else %}[`{{datatype.shortname}}`]({{datatype.iri}}){% endif %}{% endfor %} {% if property.value_list | length > 0 %}<br>_Possible values: {% for value in property.value_list -%}{% if loop.index > 1 %}, {% endif %}[`{{value.shortname}}`]({{value.iri}}){% endfor %}_{% endif %} |
 {% endfor %}
 {% endif %}
 
