@@ -32,7 +32,7 @@
 
 | Prefix | URI      |
 | :----- | :------- |
-{% for prefix, iri in namespaces %}
+{% for prefix, iri in namespaces|sort %}
 | {{ prefix }}     | [{{iri}}]({{iri}}) |
 {% endfor %}
 

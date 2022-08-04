@@ -127,7 +127,7 @@ def get_properties(g, c, lang):
 
 def main(args):
     # TODO: from rdflib 6.1.2, use bind_namespaces="none"
-    g = Graph()
+    g = Graph(bind_namespaces="none")
     for file in args.files:
         g.parse(file)
 
