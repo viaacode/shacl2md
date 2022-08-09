@@ -160,7 +160,7 @@ def generate(g, args):
 
     # Dump RDF serialization to file
     rdf_filename = f"{args.name}.shacl.ttl"
-    g.serialize(f"{output_dir}/{rdf_filename}", base="")
+    g.serialize(f"{output_dir}/{rdf_filename}")
 
     print(
         template.render(
