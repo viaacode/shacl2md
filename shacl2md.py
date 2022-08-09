@@ -1,22 +1,15 @@
 import argparse
-from lxml import etree
-from plantuml import PlantUML
 
 from jinja2 import Environment, PackageLoader, select_autoescape
+from lxml import etree
+from plantuml import PlantUML
 from rdflib.graph import Graph
 from rdflib.namespace import Namespace
 from rdflib.term import Literal
 
-from queries import (
-    GET_AUTHORS,
-    GET_CLASSES,
-    GET_DOC_MD,
-    GET_PROPERTIES,
-    GET_SUBCLASSES,
-    GET_SUPERCLASSES,
-    GET_DATATYPES,
-    GET_VALUES,
-)
+from queries import (GET_AUTHORS, GET_CLASSES, GET_DATATYPES, GET_DOC_MD,
+                     GET_PROPERTIES, GET_SUBCLASSES, GET_SUPERCLASSES,
+                     GET_VALUES)
 
 SHACL = Namespace("http://www.w3.org/ns/shacl#")
 
@@ -120,7 +113,7 @@ def get_properties(g, c, lang):
             "min": row.min,
             "max": row.max,
             "datatypes": datatypes,
-            "value_list": values
+            "value_list": values,
         }
         yield result
 
@@ -165,6 +158,10 @@ def generate(g, args):
     tree.getroot().attrib.pop("style")
     svg_text = etree.tostring(tree.getroot(), encoding="unicode", xml_declaration=False)
 
+    # Dump RDF serialization to file
+    rdf_filename = f"{args.name}.shacl.ttl"
+    g.serialize(f"{output_dir}/{rdf_filename}", base="")
+
     print(
         template.render(
             frontmatter={
@@ -173,11 +170,11 @@ def generate(g, args):
                 "parent": args.parent,
                 "nav_order": args.nav_order,
             },
+            rdf_filename=rdf_filename,
             doc=doc,
             namespaces=namespaces,
             classes=classes,
             diagramText=svg_text,
-            # diagram=f"./{svg_filename}",
         ),
         file=open(f"{output_dir}/{args.name}.md", "w"),
     )
