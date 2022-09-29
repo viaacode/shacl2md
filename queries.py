@@ -189,3 +189,27 @@ WHERE {
     } 
 }
 """
+
+GENERATE_EXAMPLE = """
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+PREFIX schema: <http://schema.org/>
+CONSTRUCT {
+    <> a ?targetClass;
+        ?iri ?value.
+}
+WHERE {
+    ?subjectclassNode sh:targetClass ?targetClass .
+    ?subjectclassNode sh:property ?shape.
+    ?shape sh:path ?iri.
+
+
+    # Cardinality
+    OPTIONAL {?shape sh:minCount ?min}
+    OPTIONAL {?shape sh:maxCount ?max}
+
+    OPTIONAL {
+        ?shape sh:nodeKind ?kind
+    }
+}
+
+"""
