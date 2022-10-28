@@ -1,4 +1,5 @@
 import argparse
+import os
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 from lxml import etree
@@ -129,15 +130,23 @@ def main(args):
 
 def generate(g, args):
     lang = args.language
-    output_dir = args.out
-
     doc = get_doc(g, lang)
+    
+    # decide on output dir
+    output_dir = args.out
+    if args.vdir:
+        output_dir = f"{args.out}/{doc.version}"
+        if not os.path.exists(output_dir):
+            os.mkdir(output_dir)
+        print(f"Directory '{output_dir}' created")
+
     namespaces = g.namespace_manager.namespaces()
     classes = list(get_classes(g, lang=lang))
 
     puml_filename = f"{args.name}-diagram.puml"
     svg_filename = f"{args.name}-diagram.svg"
 
+    # Generate PUML diagram
     print(
         puml_template.render(
             namespaces=namespaces,
@@ -145,12 +154,16 @@ def generate(g, args):
         ),
         file=open(f"{output_dir}/{puml_filename}", "w"),
     )
+    print(f"File '{output_dir}/{puml_filename}' created")
 
+    # Render PUML diagram
     pl = PlantUML("http://www.plantuml.com/plantuml/svg/")
     pl.processes_file(
         f"{output_dir}/{puml_filename}", directory=output_dir, outfile=svg_filename
     )
+    print(f"File '{output_dir}/{svg_filename}' created")
 
+    # Extract PUML SVG string 
     parser = etree.XMLParser(ns_clean=True, remove_comments=True)
     tree = etree.parse(f"{output_dir}/{svg_filename}", parser)
     tree.getroot().attrib.pop("width")
@@ -161,6 +174,7 @@ def generate(g, args):
     # Dump RDF serialization to file
     rdf_filename = f"{args.name}.shacl.ttl"
     g.serialize(f"{output_dir}/{rdf_filename}")
+    print(f"File '{output_dir}/{rdf_filename}' created")
 
     print(
         template.render(
@@ -178,6 +192,7 @@ def generate(g, args):
         ),
         file=open(f"{output_dir}/{args.name}.md", "w"),
     )
+    print(f"File '{output_dir}/{args.name}.md' created")
 
 
 if __name__ == "__main__":
@@ -235,6 +250,11 @@ if __name__ == "__main__":
         default="output",
         required=False,
         help='filename for the output file, default is "output"',
+    )
+    parser.add_argument(
+        "--vdir",
+        action='store_true',
+        help='if present, outputs files to a directory based on the SHACL version',
     )
     argsv = parser.parse_args()
     main(argsv)
