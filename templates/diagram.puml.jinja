@@ -38,7 +38,7 @@ class "{% if superclass.label %}<b>{{superclass.label}}</b> {% endif %}({{superc
 
 {# Print relations #}
 {% for datatype in property.datatypes|selectattr("type", "equalto", "class") %}
-{{class.shortname|replace(":","_")}} --> "[{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}]" {{datatype.shortname|replace(":","_")}} : {{property.label}} >
+{{class.shortname|replace(":","_")}} --> {{datatype.shortname|replace(":","_")}} : {{property.label}} [{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}] >
 {% endfor %}
 {% endfor %}
 
