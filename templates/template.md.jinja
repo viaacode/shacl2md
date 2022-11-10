@@ -18,6 +18,11 @@
 
 **SHACL file:** [{{rdf_filename}}]({{rdf_filename}})
 
+**Other languages:**
+{% for lang in languages %}
+{% if loop.index > 1 %}, {% endif %}[{{lang}}](../{{lang}})
+{% endfor %}
+
 **Authors:**
 {% for author in doc.authors %}
 {% if loop.index > 1 %}, {% endif %}[{{author.label}}](mailto:{{author.email}})

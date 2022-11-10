@@ -125,11 +125,11 @@ def main(args):
     for file in args.files:
         g.parse(file)
 
-    generate(g, args)
+    for lang in args.language:
+        generate(g, args, lang)
 
 
-def generate(g, args):
-    lang = args.language
+def generate(g, args, lang):
     doc = get_doc(g, lang)
     
     # decide on output dir
@@ -139,6 +139,11 @@ def generate(g, args):
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
         print(f"Directory '{output_dir}' created")
+
+    output_dir = f"{output_dir}/{args.name}/{lang}"
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    print(f"Directory '{output_dir}' created")
 
     namespaces = g.namespace_manager.namespaces()
     classes = list(get_classes(g, lang=lang))
@@ -176,6 +181,9 @@ def generate(g, args):
     g.serialize(f"{output_dir}/{rdf_filename}")
     print(f"File '{output_dir}/{rdf_filename}' created")
 
+    other_languages = list(args.language)
+    other_languages.remove(lang)
+
     print(
         template.render(
             frontmatter={
@@ -189,10 +197,11 @@ def generate(g, args):
             namespaces=namespaces,
             classes=classes,
             diagramText=svg_text,
+            languages=other_languages
         ),
-        file=open(f"{output_dir}/{args.name}.md", "w"),
+        file=open(f"{output_dir}/index.md", "w"),
     )
-    print(f"File '{output_dir}/{args.name}.md' created")
+    print(f"File '{output_dir}/index.md' created")
 
 
 if __name__ == "__main__":
@@ -208,8 +217,9 @@ if __name__ == "__main__":
         metavar="language",
         type=str,
         default="nl",
+        nargs="*",
         required=False,
-        help='language of generated documentation, default is "nl"',
+        help='languages of generated documentation, default is "nl"',
     )
     parser.add_argument(
         "--out",
