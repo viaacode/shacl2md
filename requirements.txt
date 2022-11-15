@@ -6,3 +6,4 @@ pyspark==3.1.1
 rdflib==6.1.1
 six==1.16.0
 plantuml==0.3.0
+pyshacl==0.20.0

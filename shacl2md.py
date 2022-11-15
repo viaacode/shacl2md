@@ -125,6 +125,23 @@ def main(args):
     for file in args.files:
         g.parse(file)
 
+    print(f"Creating {args.name}")
+    print("-----------------------------------------------")
+
+    if args.validate:
+        from pyshacl import validate
+        r = validate(g,
+            shacl_graph="http://www.w3.org/ns/shacl-shacl",
+            abort_on_first=False,
+            allow_infos=True,
+            allow_warnings=True)
+        conforms, results_graph, results_text = r
+
+        print(f"* {results_text}")
+
+        if not conforms:
+            quit()
+
     for lang in args.language:
         generate(g, args, lang)
 
@@ -138,12 +155,12 @@ def generate(g, args, lang):
         output_dir = f"{args.out}/{doc.version}"
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
-        print(f"Directory '{output_dir}' created")
+        print(f"* Directory '{output_dir}' created")
 
     output_dir = f"{output_dir}/{args.name}/{lang}"
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    print(f"Directory '{output_dir}' created")
+    print(f"* Directory '{output_dir}' created")
 
     namespaces = g.namespace_manager.namespaces()
     classes = list(get_classes(g, lang=lang))
@@ -159,14 +176,14 @@ def generate(g, args, lang):
         ),
         file=open(f"{output_dir}/{puml_filename}", "w"),
     )
-    print(f"File '{output_dir}/{puml_filename}' created")
+    print(f"* File '{output_dir}/{puml_filename}' created")
 
     # Render PUML diagram
     pl = PlantUML("http://www.plantuml.com/plantuml/svg/")
     pl.processes_file(
         f"{output_dir}/{puml_filename}", directory=output_dir, outfile=svg_filename
     )
-    print(f"File '{output_dir}/{svg_filename}' created")
+    print(f"* File '{output_dir}/{svg_filename}' created")
 
     # Extract PUML SVG string 
     parser = etree.XMLParser(ns_clean=True, remove_comments=True)
@@ -179,7 +196,7 @@ def generate(g, args, lang):
     # Dump RDF serialization to file
     rdf_filename = f"{args.name}.shacl.ttl"
     g.serialize(f"{output_dir}/{rdf_filename}")
-    print(f"File '{output_dir}/{rdf_filename}' created")
+    print(f"* File '{output_dir}/{rdf_filename}' created")
 
     other_languages = list(args.language)
     other_languages.remove(lang)
@@ -201,7 +218,7 @@ def generate(g, args, lang):
         ),
         file=open(f"{output_dir}/index.md", "w"),
     )
-    print(f"File '{output_dir}/index.md' created")
+    print(f"* File '{output_dir}/index.md' created")
 
 
 if __name__ == "__main__":
@@ -265,6 +282,11 @@ if __name__ == "__main__":
         "--vdir",
         action='store_true',
         help='if present, outputs files to a directory based on the SHACL version',
+    )
+    parser.add_argument(
+        "--validate",
+        action='store_true',
+        help='if present, the shacl file is validated against the SHACL-SHACL.',
     )
     argsv = parser.parse_args()
     main(argsv)
