@@ -130,11 +130,14 @@ def main(args):
 
     if args.validate:
         from pyshacl import validate
-        r = validate(g,
+
+        r = validate(
+            g,
             shacl_graph="http://www.w3.org/ns/shacl-shacl",
             abort_on_first=False,
             allow_infos=True,
-            allow_warnings=True)
+            allow_warnings=True,
+        )
         conforms, results_graph, results_text = r
 
         print(f"* {results_text}")
@@ -148,7 +151,7 @@ def main(args):
 
 def generate(g, args, lang):
     doc = get_doc(g, lang)
-    
+
     # decide on output dir
     output_dir = args.out
     if args.vdir:
@@ -188,7 +191,7 @@ def generate(g, args, lang):
     if args.nodocs:
         return
 
-    # Extract PUML SVG string 
+    # Extract PUML SVG string
     parser = etree.XMLParser(ns_clean=True, remove_comments=True)
     tree = etree.parse(f"{output_dir}/{svg_filename}", parser)
     tree.getroot().attrib.pop("width")
@@ -217,7 +220,7 @@ def generate(g, args, lang):
             namespaces=namespaces,
             classes=classes,
             diagramText=svg_text,
-            languages=other_languages
+            languages=other_languages,
         ),
         file=open(f"{output_dir}/index.md", "w"),
     )
@@ -283,18 +286,18 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--vdir",
-        action='store_true',
-        help='if present, outputs files to a directory based on the SHACL version',
+        action="store_true",
+        help="if present, outputs files to a directory based on the SHACL version",
     )
     parser.add_argument(
         "--validate",
-        action='store_true',
-        help='if present, the shacl file is validated against the SHACL-SHACL.',
+        action="store_true",
+        help="if present, the shacl file is validated against the SHACL-SHACL.",
     )
     parser.add_argument(
         "--nodocs",
-        action='store_true',
-        help='if present, only a diagram is produced.',
+        action="store_true",
+        help="if present, only a diagram is produced.",
     )
     argsv = parser.parse_args()
     main(argsv)
