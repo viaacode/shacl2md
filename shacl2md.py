@@ -185,6 +185,9 @@ def generate(g, args, lang):
     )
     print(f"* File '{output_dir}/{svg_filename}' created")
 
+    if args.nodocs:
+        return
+
     # Extract PUML SVG string 
     parser = etree.XMLParser(ns_clean=True, remove_comments=True)
     tree = etree.parse(f"{output_dir}/{svg_filename}", parser)
@@ -287,6 +290,11 @@ if __name__ == "__main__":
         "--validate",
         action='store_true',
         help='if present, the shacl file is validated against the SHACL-SHACL.',
+    )
+    parser.add_argument(
+        "--nodocs",
+        action='store_true',
+        help='if present, only a diagram is produced.',
     )
     argsv = parser.parse_args()
     main(argsv)
