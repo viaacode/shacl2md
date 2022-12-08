@@ -214,6 +214,7 @@ def generate(g, args, lang):
                 "title": doc.title,
                 "parent": args.parent,
                 "nav_order": args.nav_order,
+                "nav_exclude": args.language[0] != lang
             },
             rdf_filename=rdf_filename,
             doc=doc,
