@@ -147,21 +147,18 @@ function onPointerDown(event) {
   pointerOrigin.y = pointerPosition.y;
 }
 
-var viewBoxString = svg.getAttribute('viewBox').split(/\s+|,/);
+var originalViewBoxString = svg.getAttribute('viewBox');
+var originalViewBoxList= svg.viewBox.baseVal;
+
 var originalViewBox = {
-    x: viewBoxString[0],
-    y: viewBoxString[1],
-    width: viewBoxString[2],
-    heigth: viewBoxString[3]
+    x: originalViewBoxList.x,
+    y: originalViewBoxList.y,
+    width: originalViewBoxList.width,
+    height: originalViewBoxList.height
 };
 
-var viewBox = {
-  x: 0,
-  y: 0,
-  width: 2089,
-  height: 986
-};
-
+var viewBox = structuredClone(originalViewBox);
+console.log(viewBox);
 var newViewBox = {
   x: 0,
   y: 0
@@ -195,10 +192,10 @@ function onPointerUp() {
 }
 function onMouseOutZoomDiv(event) {
 
-  var viewBoxString = `0 0 2089 986`;
+  var viewBoxString = structuredClone(originalViewBoxString);
   viewBox.x = 0;
   viewBox.y = 0;
-  svg.setAttribute('viewBox', viewBoxString);
+  svg.setAttribute('viewBox', originalViewBoxString);
 }
 
 </script>
