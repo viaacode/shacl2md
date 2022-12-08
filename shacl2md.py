@@ -1,5 +1,6 @@
 import argparse
 import os
+from itertools import groupby
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 from lxml import etree
@@ -61,13 +62,28 @@ def get_subclasses(g, c, lang):
 
 
 def get_classes(g, lang):
+    def iri_func(p):
+        return p['iri']
     for c in g.query(GET_CLASSES, initBindings={"lang": Literal(lang)}):
+        ungrouped_properties = list(get_properties(g, c.iri, lang))
+        properties = []
+        for prop_iri, prop_shapes in groupby(ungrouped_properties, key=iri_func):
+            prop_shapes = list(prop_shapes)
+            property = prop_shapes[0]
+            for prop in prop_shapes:
+                for key in prop:
+                    if prop[key] != property[key] and prop[key] and property[key]:
+                        print(prop_iri, key, prop[key], property[key])
+                        properties.append(prop)
+                    elif not property[key] and prop[key]:
+                        property[key] = prop[key]
+            properties.append(property)
         yield {
             "iri": c.iri,
             "shortname": to_shortname(g, c.iri),
             "label": c.label,
             "description": c.description,
-            "properties": list(get_properties(g, c.iri, lang)),
+            "properties": properties,
             "superclasses": list(get_superclasses(g, c.iri, lang)),
             "subclasses": list(get_subclasses(g, c.iri, lang)),
         }
