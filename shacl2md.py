@@ -73,7 +73,6 @@ def get_classes(g, lang):
             for prop in prop_shapes:
                 for key in prop:
                     if prop[key] != property[key] and prop[key] and property[key]:
-                        print(prop_iri, key, prop[key], property[key])
                         properties.append(prop)
                     elif not property[key] and prop[key]:
                         property[key] = prop[key]
