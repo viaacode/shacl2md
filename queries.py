@@ -37,7 +37,6 @@ WHERE {
     } UNION {
         ?property sh:or*/rdf:rest*/rdf:first*/sh:class ?iri .
     }
-
     OPTIONAL { 
         ?iri rdfs:label ?label. 
      FILTER(lang(?label) = ?lang)
@@ -118,9 +117,13 @@ WHERE {
     OPTIONAL {?iri rdfs:comment ?rdfsdescription
         FILTER(lang(?rdfsdescription) = ?lang) 
     }
+    OPTIONAL {?iri skos:definition ?skosdefinition
+        FILTER(lang(?skosdefinition) = ?lang) 
+    }
     BIND (
         COALESCE(
             IF(bound(?shacldescription), ?shacldescription, 1/0),
+            IF(bound(?skosdefinition), ?skosdefinition, 1/0),
             IF(bound(?rdfsdescription), ?rdfsdescription, 1/0)
         ) AS ?description
     )
