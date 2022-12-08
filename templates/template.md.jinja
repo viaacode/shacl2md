@@ -1,6 +1,6 @@
 ---
 {% for k, v in frontmatter.items() %}
-{{k}}: {% if v is number %}{{v}}{% else %}"{{v}}"{% endif %}
+{{k}}: {% if v is number or v is boolean %}{{v}}{% else %}"{{v}}"{% endif %}
 
 {% endfor %}
 ---
