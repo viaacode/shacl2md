@@ -93,6 +93,109 @@ _Properties from [{{parent.label}}](#{{parent.shortname|urlencode}}):_ {% for pr
     height: auto;
     background-color: #fff;
 }
-.zoom { transition: transform ease-in-out 0.2s; }
-.zoom:hover { transform: scale(2.0); }
+.zoom { position: relative; transition: transform ease-in-out 0.2s; z-index: 10; border: 2px solid #E6E6E6;}
+/* .zoom:hover { transform: scale(2.0); cursor: grab; } */
+.zoom:hover { transform: scale(2.0); cursor: grab; }
+.zoom:active { cursor: grabbing; }
 </style>
+<script>
+var svg = document.querySelector('svg[zoomAndPan="magnify"]');
+var zoomDiv = document.querySelector('.zoom');
+zoomDiv.addEventListener('mouseleave', onMouseOutZoomDiv);
+if (window.PointerEvent) {
+  svg.addEventListener('pointerdown', onPointerDown);
+  svg.addEventListener('pointerup', onPointerUp);
+  svg.addEventListener('pointerleave', onPointerUp); 
+  svg.addEventListener('pointermove', onPointerMove); 
+} else {
+
+  svg.addEventListener('mousedown', onPointerDown); 
+  svg.addEventListener('mouseup', onPointerUp); 
+  svg.addEventListener('mouseleave', onPointerUp); 
+  svg.addEventListener('mousemove', onPointerMove); 
+
+  svg.addEventListener('touchstart', onPointerDown);
+  svg.addEventListener('touchend', onPointerUp);
+  svg.addEventListener('touchmove', onPointerMove); 
+}
+
+function getPointFromEvent (event) {
+  var point = {x:0, y:0};
+  if (event.targetTouches) {
+    point.x = event.targetTouches[0].clientX;
+    point.y = event.targetTouches[0].clientY;
+  } else {
+    point.x = event.clientX;
+    point.y = event.clientY;
+  }
+  
+  return point;
+}
+
+var isPointerDown = false;
+
+var pointerOrigin = {
+  x: 0,
+  y: 0
+};
+
+function onPointerDown(event) {
+  isPointerDown = true; 
+  
+  var pointerPosition = getPointFromEvent(event);
+  pointerOrigin.x = pointerPosition.x;
+  pointerOrigin.y = pointerPosition.y;
+}
+
+var originalViewBoxString = svg.getAttribute('viewBox');
+var originalViewBoxList= svg.viewBox.baseVal;
+
+var originalViewBox = {
+    x: originalViewBoxList.x,
+    y: originalViewBoxList.y,
+    width: originalViewBoxList.width,
+    height: originalViewBoxList.height
+};
+
+var viewBox = structuredClone(originalViewBox);
+console.log(viewBox);
+var newViewBox = {
+  x: 0,
+  y: 0
+};
+
+var ratio = viewBox.width / svg.getBoundingClientRect().width;
+window.addEventListener('resize', function() {
+  ratio = viewBox.width / svg.getBoundingClientRect().width;
+});
+
+function onPointerMove (event) {
+  if (!isPointerDown) {
+    return;
+  }
+  event.preventDefault();
+
+  var pointerPosition = getPointFromEvent(event);
+
+  newViewBox.x = viewBox.x - ((pointerPosition.x - pointerOrigin.x) * ratio);
+  newViewBox.y = viewBox.y - ((pointerPosition.y - pointerOrigin.y) * ratio);
+
+  var viewBoxString = `${newViewBox.x} ${newViewBox.y} ${viewBox.width} ${viewBox.height}`;
+  svg.setAttribute('viewBox', viewBoxString);
+}
+
+function onPointerUp() {
+  isPointerDown = false;
+
+  viewBox.x = newViewBox.x;
+  viewBox.y = newViewBox.y;
+}
+function onMouseOutZoomDiv(event) {
+
+  var viewBoxString = structuredClone(originalViewBoxString);
+  viewBox.x = 0;
+  viewBox.y = 0;
+  svg.setAttribute('viewBox', originalViewBoxString);
+}
+
+</script>
