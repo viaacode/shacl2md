@@ -135,23 +135,6 @@ WHERE {
     OPTIONAL {
         ?shape sh:nodeKind ?kind
     }
-    # Datatype
-    #OPTIONAL {
-    #    ?shape sh:or*/rdf:rest*/rdf:first*/sh:datatype ?datatype .
-    #    OPTIONAL {
-    #        ?datatype rdfs:label ?datatype_label
-    #        FILTER(lang(?datatype_label) = ?lang)
-    #    }
-    #}
-
-    # Class
-    #OPTIONAL {
-    #    ?shape sh:or*/rdf:rest*/rdf:first*/sh:class ?classtype .
-    #    OPTIONAL {
-    #        ?classtype rdfs:label ?classtype_label
-    #        FILTER(lang(?classtype_label) = ?lang)
-    #    }
-    #}
 }
 ORDER BY ?label
 """

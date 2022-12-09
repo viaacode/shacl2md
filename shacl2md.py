@@ -67,11 +67,13 @@ def get_classes(g, lang):
     for c in g.query(GET_CLASSES, initBindings={"lang": Literal(lang)}):
         ungrouped_properties = list(get_properties(g, c.iri, lang))
         properties = []
+        # Group properties by iri
         for prop_iri, prop_shapes in groupby(ungrouped_properties, key=iri_func):
             prop_shapes = list(prop_shapes)
             property = prop_shapes[0]
             for prop in prop_shapes:
                 for key in prop:
+
                     if prop[key] != property[key] and prop[key] and property[key]:
                         properties.append(prop)
                     elif not property[key] and prop[key]:
