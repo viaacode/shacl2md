@@ -200,10 +200,13 @@ def generate(g, args, lang):
 
     # Render PUML diagram
     pl = PlantUML("http://www.plantuml.com/plantuml/svg/")
-    pl.processes_file(
-        f"{output_dir}/{puml_filename}", directory=output_dir, outfile=svg_filename
-    )
-    print(f"* File '{output_dir}/{svg_filename}' created")
+    try:
+        pl.processes_file(
+            f"{output_dir}/{puml_filename}", directory=output_dir, outfile=svg_filename
+        )
+        print(f"* File '{output_dir}/{svg_filename}' created")
+    except:
+        print(f"* File '{output_dir}/{svg_filename}' not created due to PlantUML error")
 
     if args.nodocs:
         return
