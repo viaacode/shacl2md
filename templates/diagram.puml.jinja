@@ -3,7 +3,8 @@
 skinparam classFontSize 14
 !define LIGHTORANGE
 skinparam componentStyle uml2
-skinparam wrapMessageWidth 100
+skinparam wrapMessageWidth 1000
+skinparam wrapWidth 1000
 ' skinparam ArrowColor #Maroon
 ' Remove shadows
 skinparam shadowing false
@@ -48,7 +49,7 @@ class "{% if superclass.label %}<b>{{superclass.label}}</b> {% endif %}({{superc
 {% for datatype, properties in unpacked_class_properties|groupby('datatype.shortname') %}
 {% for property in properties %}
 {%- if property.datatype.type == "class" -%}
-{%- if loop.index == 1 %}{{class.shortname|replace(":","_")}} --> {{property.datatype.shortname|replace(":","_")}} :{% else %} \l{% endif %}{{property.label}} \l [{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}] {% if loop.index==properties|length %} > {% endif %}
+{%- if loop.index == 1 %}{{class.shortname|replace(":","_")}} --> {{property.datatype.shortname|replace(":","_")}} :{% else %} \l{% endif %}{{property.label}} [{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}] {% if loop.index==properties|length %} > {% endif %}
 {%- endif -%}
 {% endfor %}
 
