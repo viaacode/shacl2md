@@ -31,8 +31,10 @@
 
 {{doc.description}}
 
-<div class="zoom">
-{{diagramText}}
+<div class="wrap">
+  <div class="zoom">
+  {{diagramText}}
+  </div>
 </div>
 
 ## Namespaces
@@ -93,10 +95,27 @@ _Properties from [{{parent.label}}](#{{parent.shortname|urlencode}}):_ {% for pr
     height: auto;
     background-color: #fff;
 }
-.zoom { position: relative; transition: transform ease-in-out 0.2s; z-index: 10; border: 2px solid #E6E6E6;}
-/* .zoom:hover { transform: scale(2.0); cursor: grab; } */
-.zoom:hover { transform: scale(2.0); cursor: grab; }
-.zoom:active { cursor: grabbing; }
+
+.zoom > svg text{
+   -webkit-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
+}
+
+.wrap {
+  overflow: hidden;
+  border: 1px solid #E6E6E6;
+}
+
+.zoom {
+  position: relative;
+}
+
+.zoom:hover {
+  transform: scale(2.0); cursor: grab;
+}
+
 </style>
 <script>
 var svg = document.querySelector('svg[zoomAndPan="magnify"]');
