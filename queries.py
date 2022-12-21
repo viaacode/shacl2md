@@ -27,16 +27,32 @@ WHERE {
     OPTIONAL { ?a schema:email ?email. } 
 }
 """
+GET_CLASS = """
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT DISTINCT ?label ?description
+WHERE {
+    ?shape a sh:NodeShape ;
+        sh:targetClass ?iri .
+    OPTIONAL { 
+        ?iri rdfs:label ?label . 
+     FILTER(lang(?label) = ?lang)
+    }
+    OPTIONAL { 
+        ?iri rdfs:comment ?description . 
+        FILTER(lang(?description) = ?lang)
+    }
+}
+"""
 
 GET_CLASSES = """
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 SELECT DISTINCT ?iri ?label ?description
 WHERE {
-    {
-        ?subjectclassNode sh:targetClass ?iri . 
-    } UNION {
-        ?property sh:or*/rdf:rest*/rdf:first*/sh:class ?iri .
-    }
+    # {
+    ?subjectclassNode sh:targetClass ?iri . 
+    # } UNION {
+    #     ?property sh:or*/rdf:rest*/rdf:first*/sh:class ?iri .
+    # }
     OPTIONAL { 
         ?iri rdfs:label ?label. 
      FILTER(lang(?label) = ?lang)
@@ -175,5 +191,13 @@ WHERE {
             FILTER(lang(?label) = ?lang)
         }    
     } 
+}
+"""
+CLASS_EXISTS_CHECK = """
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX sh: <http://www.w3.org/ns/shacl#> 
+ASK {
+    ?shape a sh:NodeShape ;
+        sh:targetClass ?iri .
 }
 """
