@@ -126,8 +126,6 @@ class RDFProperty:
                 elif dt.type.toPython() == "class":
                     dt_class= RDFClass(lang, dt.iri, to_shortname(g, dt.iri), dt.label)
                     class_exists = g.query(CLASS_EXISTS_CHECK, initBindings={"iri": dt["iri"]}).askAnswer
-                    if not dt_class.label:
-                        print(f"Class {dt_class.shortname} does not have a label.")
                     if g_crosslinks and (not class_exists or not dt_class.label):
                         for graph in g_crosslinks:
                             if graph.query(CLASS_EXISTS_CHECK, initBindings={"iri": dt["iri"]}).askAnswer:
@@ -240,24 +238,7 @@ def get_output_dir(args, lang : str, doc):
     print(f"* Directory '{output_dir}' created")
     return output_dir
 
-
-def generate(g : Graph, args, lang : str):
-    doc = get_doc(g, lang)
-
-    # decide on output dir
-    output_dir = get_output_dir(args, lang, doc)
-
-    namespaces = g.namespace_manager.namespaces() 
-
-    if args.crosslinks:
-        g_crosslinks = list(get_crosslink_graphs(args.crosslinks))
-    else:
-        g_crosslinks = []
-
-    classes = list(get_classes(g, lang, g_crosslinks))
-    for class_ in classes:
-        print(class_)
-
+def generate_puml(args, output_dir, namespaces, classes):
     puml_filename = f"{args.name}-diagram.puml"
     svg_filename = f"{args.name}-diagram.svg"
 
@@ -282,7 +263,7 @@ def generate(g : Graph, args, lang : str):
         print(f"* File '{output_dir}/{svg_filename}' not created due to PlantUML error")
 
     if args.nodocs:
-        return
+        return None
 
     # Extract PUML SVG string
     parser = etree.XMLParser(ns_clean=True, remove_comments=True)
@@ -291,7 +272,9 @@ def generate(g : Graph, args, lang : str):
     tree.getroot().attrib.pop("height")
     tree.getroot().attrib.pop("style")
     svg_text = etree.tostring(tree.getroot(), encoding="unicode", xml_declaration=False)
+    return svg_text
 
+def generate_md(args, output_dir, lang, doc, namespaces, classes, svg_text):
     # Dump RDF serialization to file
     rdf_filename = f"{args.name}.shacl.ttl"
     g.serialize(f"{output_dir}/{rdf_filename}")
@@ -320,6 +303,23 @@ def generate(g : Graph, args, lang : str):
     )
     print(f"* File '{output_dir}/index.md' created")
 
+def generate(g : Graph, g_crosslinks: List[Graph], args, lang : str):
+    doc = get_doc(g, lang)
+
+    # decide on output dir
+    output_dir = get_output_dir(args, lang, doc)
+
+    namespaces = g.namespace_manager.namespaces() 
+
+    classes = list(get_classes(g, lang, g_crosslinks))
+    for class_ in classes:
+        print(class_)
+
+    svg_text = generate_puml(args, output_dir, namespaces, classes)
+    if svg_text:
+        generate_md(args, output_dir, lang, doc, namespaces, classes, svg_text)
+    
+
 
 def main(args):
     # TODO: from rdflib 6.1.2, use bind_namespaces="none"
@@ -329,7 +329,12 @@ def main(args):
     print(args.name)
     print(f"Creating {args.name}")
     print("-----------------------------------------------")
-
+    
+    if args.crosslinks:
+        g_crosslinks = list(get_crosslink_graphs(args.crosslinks))
+    else:
+        g_crosslinks = []
+        
     if args.validate:
         from pyshacl import validate
 
@@ -348,7 +353,7 @@ def main(args):
             quit()
 
     for lang in args.language:
-        generate(g, args, lang)
+        generate(g, g_crosslinks, args, lang)
 
 
 
@@ -416,7 +421,7 @@ if __name__ == "__main__":
         type=str,
         nargs="*",
         required=False,
-        help='filenames of shacl files to find crosslinks in',
+        help='crosslink graphs to find classes in: format is "name;file1;file2;..."',
     )
     parser.add_argument(
         "--vdir",
