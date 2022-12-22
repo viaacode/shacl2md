@@ -217,11 +217,10 @@ def get_classes(g : Graph, lang : str, g_crosslinks: List[Graph]):
         yield c.to_dict()
     for c in g.query(GET_CLASSES_RANGE, initBindings={"lang": Literal(lang)}):
         c = RDFClass(lang, c.iri, to_shortname(g, c.iri), c.label, c.description)
-        if not c.label and g_crosslinks:
-            for graph in g_crosslinks:
-                if graph.query(CLASS_EXISTS_CHECK, initBindings={"iri":c.iri}).askAnswer:
-                    c.set_crosslink(graph.identifier)
-                    c.get_class_info(graph)
+        for graph in g_crosslinks:
+            if graph.query(CLASS_EXISTS_CHECK, initBindings={"iri":c.iri}).askAnswer:
+                c.set_crosslink(graph.identifier)
+                c.get_class_info(graph)
         c.get_subclasses(g)
         c.get_superclasses(g)
         yield c.to_dict()
