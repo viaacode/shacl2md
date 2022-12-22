@@ -12,7 +12,7 @@ from rdflib.term import Literal
 
 from queries import (GET_AUTHORS, GET_CLASSES, GET_DATATYPES, GET_DOC_MD,
                      GET_PROPERTIES, GET_SUBCLASSES, GET_SUPERCLASSES,
-                     GET_VALUES, CLASS_EXISTS_CHECK, GET_CLASS)
+                     GET_VALUES, CLASS_EXISTS_CHECK, GET_CLASS, GET_CLASSES_RANGE)
 
 SHACL = Namespace("http://www.w3.org/ns/shacl#")
 
@@ -82,7 +82,7 @@ class RDFClass:
             self.description = row.description
 
     def set_crosslink(self, crosslink):
-        self.crosslink = f"../../{crosslink}/{self.lang}"
+        self.crosslink = crosslink
 
     # deep copy method
     def copy(self):
@@ -215,6 +215,16 @@ def get_classes(g : Graph, lang : str, g_crosslinks: List[Graph]):
         c.get_subclasses(g)
         c.get_superclasses(g)
         yield c.to_dict()
+    for c in g.query(GET_CLASSES_RANGE, initBindings={"lang": Literal(lang)}):
+        c = RDFClass(lang, c.iri, to_shortname(g, c.iri), c.label, c.description)
+        if not c.label and g_crosslinks:
+            for graph in g_crosslinks:
+                if graph.query(CLASS_EXISTS_CHECK, initBindings={"iri":c.iri}).askAnswer:
+                    c.set_crosslink(graph.identifier)
+                    c.get_class_info(graph)
+        c.get_subclasses(g)
+        c.get_superclasses(g)
+        yield c.to_dict()
 
 def get_crosslink_graphs(crosslinks):
     for crosslink in crosslinks:
@@ -226,17 +236,19 @@ def get_crosslink_graphs(crosslinks):
 
 def get_output_dir(args, lang : str, doc):
     output_dir = args.out
+    output_dir_length = 1
     if args.vdir:
         output_dir = f"{args.out}/{doc.version}"
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
         print(f"* Directory '{output_dir}' created")
+        output_dir_length += 1
 
     output_dir = f"{output_dir}/{args.name}/{lang}"
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     print(f"* Directory '{output_dir}' created")
-    return output_dir
+    return output_dir, output_dir_length
 
 def generate_puml(args, output_dir, namespaces, classes):
     puml_filename = f"{args.name}-diagram.puml"
@@ -274,7 +286,7 @@ def generate_puml(args, output_dir, namespaces, classes):
     svg_text = etree.tostring(tree.getroot(), encoding="unicode", xml_declaration=False)
     return svg_text
 
-def generate_md(args, output_dir, lang, doc, namespaces, classes, svg_text):
+def generate_md(args, g, output_dir, output_dir_length, lang, doc, namespaces, classes, svg_text):
     # Dump RDF serialization to file
     rdf_filename = f"{args.name}.shacl.ttl"
     g.serialize(f"{output_dir}/{rdf_filename}")
@@ -298,6 +310,7 @@ def generate_md(args, output_dir, lang, doc, namespaces, classes, svg_text):
             classes=classes,
             diagramText=svg_text,
             languages=other_languages,
+            output_dir_length=output_dir_length,
         ),
         file=open(f"{output_dir}/index.md", "w"),
     )
@@ -307,17 +320,15 @@ def generate(g : Graph, g_crosslinks: List[Graph], args, lang : str):
     doc = get_doc(g, lang)
 
     # decide on output dir
-    output_dir = get_output_dir(args, lang, doc)
+    output_dir, output_dir_length = get_output_dir(args, lang, doc)
 
     namespaces = g.namespace_manager.namespaces() 
 
     classes = list(get_classes(g, lang, g_crosslinks))
-    for class_ in classes:
-        print(class_)
 
     svg_text = generate_puml(args, output_dir, namespaces, classes)
     if svg_text:
-        generate_md(args, output_dir, lang, doc, namespaces, classes, svg_text)
+        generate_md(args, g, output_dir, output_dir_length, lang, doc, namespaces, classes, svg_text)
     
 
 
@@ -334,7 +345,7 @@ def main(args):
         g_crosslinks = list(get_crosslink_graphs(args.crosslinks))
     else:
         g_crosslinks = []
-        
+
     if args.validate:
         from pyshacl import validate
 
