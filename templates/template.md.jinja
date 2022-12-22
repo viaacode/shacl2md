@@ -77,14 +77,17 @@
 | Property | Description | Cardinality | Datatype |
 | :------ | :---------- | :---------- | :------- |
 {% for property in class.properties %}
-| <a id='{{property.shortname|urlencode}}'></a>{{property.label}} <br> <small>[({{property.shortname}})]({{property.iri}})</small> | {{property.description if property.description is not none}} | `{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}` | {% for datatype in property.datatypes -%}{% if loop.index > 1 %} _or_ {% endif %}{% if datatype.type == "class" %}{% if datatype.crosslink %}[{{datatype.label}}]({{datatype.crosslink}}#{{datatype.shortname|urlencode}}){% else %}[{{datatype.label}}](#{{datatype.shortname|urlencode}}){% endif %}{% else %}[`{{datatype.shortname}}`]({{datatype.iri}}){% endif %}{% endfor %} {% if property.value_list | length > 0 %}<br>_Possible values: {% for value in property.value_list -%}{% if loop.index > 1 %}, {% endif %}[`{{value.shortname}}`]({{value.iri}}){% endfor %}_{% endif %} |
+| <a id='{{property.shortname|urlencode}}'></a>{{property.label}} <br> <small>[({{property.shortname}})]({{property.iri}})</small> | {{property.description if property.description is not none}} | `{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}` | {% for datatype in property.datatypes -%}{% if loop.index > 1 %} _or_ {% endif %}{% if datatype.type == "class" %}{% if datatype.crosslink %}[{{datatype.label}}](../{% if output_dir_length == 2 %}../{% endif %}{{datatype.crosslink}}/{{datatype.lang}}#{{datatype.shortname|urlencode}}){% else %}[{{datatype.label}}](#{{datatype.shortname|urlencode}}){% endif %}{% else %}[`{{datatype.shortname}}`]({{datatype.iri}}){% endif %}{% endfor %} {% if property.value_list | length > 0 %}<br>_Possible values: {% for value in property.value_list -%}{% if loop.index > 1 %}, {% endif %}[`{{value.shortname}}`]({{value.iri}}){% endfor %}_{% endif %} |
 {% endfor %}
+{% elif class.crosslink %}
+Crosslink to: [{{class.crosslink}}](../{% if output_dir_length == 2 %}../{% endif %}{{class.crosslink}}/{{class.lang}}#{{class.shortname|urlencode}})
 {% endif %}
 
 {% for parent in class.superclasses %}
 {% if parent.properties|length > 0 %}
 _Properties from [{{parent.label}}](#{{parent.shortname|urlencode}}):_ {% for property in parent.properties %}{% if loop.index > 1 %}, {% endif %} [{{property.label}}](#{{property.shortname|urlencode}}){% endfor %}
 {% endif %}
+
 {% endfor %}
 
 {% endfor %}
