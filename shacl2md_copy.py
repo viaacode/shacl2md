@@ -236,7 +236,7 @@ def get_output_dir(args, lang : str, doc):
     print(f"* Directory '{output_dir}' created")
     return output_dir, output_dir_length
 
-def generate_puml(args, output_dir, namespaces, classes):
+def generate_puml(args, output_dir, output_dir_length, namespaces, classes):
     puml_filename = f"{args.name}-diagram.puml"
     svg_filename = f"{args.name}-diagram.svg"
 
@@ -245,6 +245,7 @@ def generate_puml(args, output_dir, namespaces, classes):
         puml_template.render(
             namespaces=namespaces,
             classes=classes,
+            output_dir_length=output_dir_length,
         ),
         file=open(f"{output_dir}/{puml_filename}", "w"),
     )
@@ -312,7 +313,7 @@ def generate(g : Graph, g_crosslinks: List[Graph], args, lang : str):
 
     classes = list(get_classes(g, lang, g_crosslinks))
 
-    svg_text = generate_puml(args, output_dir, namespaces, classes)
+    svg_text = generate_puml(args, output_dir, output_dir_length, namespaces, classes)
     if svg_text:
         generate_md(args, g, output_dir, output_dir_length, lang, doc, namespaces, classes, svg_text)
     
