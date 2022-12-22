@@ -12,7 +12,7 @@ from rdflib.term import Literal
 
 from queries import (GET_AUTHORS, GET_CLASSES, GET_DATATYPES, GET_DOC_MD,
                      GET_PROPERTIES, GET_SUBCLASSES, GET_SUPERCLASSES,
-                     GET_VALUES, CLASS_EXISTS_CHECK, GET_CLASS, GET_CLASSES_RANGE)
+                     GET_VALUES, CLASS_EXISTS_CHECK, GET_CLASS)
 
 SHACL = Namespace("http://www.w3.org/ns/shacl#")
 
@@ -81,8 +81,14 @@ class RDFClass:
             self.label = row.label
             self.description = row.description
 
-    def set_crosslink(self, crosslink):
-        self.crosslink = crosslink
+    def check_crosslink(self, g : Graph, g_crosslinks : List[Graph] = []):
+        class_exists = g.query(CLASS_EXISTS_CHECK, initBindings={"iri": self.iri}).askAnswer
+        if g_crosslinks and (not class_exists or not self.label):
+            for graph in g_crosslinks:
+                if graph.query(CLASS_EXISTS_CHECK, initBindings={"iri": self.iri}).askAnswer:
+                    if not class_exists:
+                        self.crosslink = graph.identifier
+                    self.get_class_info(graph)
 
     # deep copy method
     def copy(self):
@@ -125,13 +131,7 @@ class RDFProperty:
                     yield RDFDatatype(dt.iri, to_shortname(g, dt.iri), dt.label,)
                 elif dt.type.toPython() == "class":
                     dt_class= RDFClass(lang, dt.iri, to_shortname(g, dt.iri), dt.label)
-                    class_exists = g.query(CLASS_EXISTS_CHECK, initBindings={"iri": dt["iri"]}).askAnswer
-                    if g_crosslinks and (not class_exists or not dt_class.label):
-                        for graph in g_crosslinks:
-                            if graph.query(CLASS_EXISTS_CHECK, initBindings={"iri": dt["iri"]}).askAnswer:
-                                if not class_exists:
-                                    dt_class.set_crosslink(graph.identifier)
-                                dt_class.get_class_info(graph)
+                    dt_class.check_crosslink(g, g_crosslinks)
                     yield dt_class           
         self.datatypes = list(get_datatypes_generator())
 
@@ -203,24 +203,11 @@ def get_doc(g : Graph, lang : str):
         row.authors = list(g.query(GET_AUTHORS))
         return row
 
-
-
 def get_classes(g : Graph, lang : str, g_crosslinks: List[Graph]):
     for c in g.query(GET_CLASSES, initBindings={"lang": Literal(lang)}):
         c = RDFClass(lang, c.iri, to_shortname(g, c.iri), c.label, c.description)
-        if not c.label and g_crosslinks:
-            for graph in g_crosslinks:
-                c.get_class_info(graph)
+        c.check_crosslink(g, g_crosslinks)
         c.get_properties(g, g_crosslinks)
-        c.get_subclasses(g)
-        c.get_superclasses(g)
-        yield c.to_dict()
-    for c in g.query(GET_CLASSES_RANGE, initBindings={"lang": Literal(lang)}):
-        c = RDFClass(lang, c.iri, to_shortname(g, c.iri), c.label, c.description)
-        for graph in g_crosslinks:
-            if graph.query(CLASS_EXISTS_CHECK, initBindings={"iri":c.iri}).askAnswer:
-                c.set_crosslink(graph.identifier)
-                c.get_class_info(graph)
         c.get_subclasses(g)
         c.get_superclasses(g)
         yield c.to_dict()
