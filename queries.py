@@ -63,7 +63,23 @@ WHERE {
     }
 }
 """
+GET_CLASSES_RANGE = """
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT DISTINCT ?iri ?label ?description
+WHERE {
 
+    ?property sh:or*/rdf:rest*/rdf:first*/sh:class ?iri .
+    FILTER NOT EXISTS {?subjectclassNode sh:targetClass ?iri .}
+    OPTIONAL { 
+        ?iri rdfs:label ?label. 
+     FILTER(lang(?label) = ?lang)
+    }
+    OPTIONAL { 
+        ?iri rdfs:comment ?description. 
+        FILTER(lang(?description) = ?lang)
+    }
+}
+"""
 GET_SUBCLASSES = """
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 SELECT DISTINCT ?iri ?label ?description
