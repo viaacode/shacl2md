@@ -10,9 +10,18 @@ from rdflib.graph import Graph
 from rdflib.namespace import Namespace
 from rdflib.term import Literal
 
-from queries import (GET_AUTHORS, GET_CLASSES, GET_DATATYPES, GET_DOC_MD,
-                     GET_PROPERTIES, GET_SUBCLASSES, GET_SUPERCLASSES,
-                     GET_VALUES, CLASS_EXISTS_CHECK, GET_CLASS)
+from queries import (
+    CLASS_EXISTS_CHECK,
+    GET_AUTHORS,
+    GET_CLASS,
+    GET_CLASSES,
+    GET_DATATYPES,
+    GET_DOC_MD,
+    GET_PROPERTIES,
+    GET_SUBCLASSES,
+    GET_SUPERCLASSES,
+    GET_VALUES,
+)
 
 SHACL = Namespace("http://www.w3.org/ns/shacl#")
 
@@ -25,14 +34,18 @@ env = Environment(
 template = env.get_template("template.md.jinja")
 puml_template = env.get_template("diagram.puml.jinja")
 
-class RDFClass:
 
-    def __init__(self,
-            lang : str, iri,
-            shortname, label=None,
-            description=None,):
-        self.lang : str = lang
-        self.iri  : str = iri
+class RDFClass:
+    def __init__(
+        self,
+        lang: str,
+        iri,
+        shortname,
+        label=None,
+        description=None,
+    ):
+        self.lang: str = lang
+        self.iri: str = iri
         self.shortname = shortname
         self.label = label
         self.description = description
@@ -42,57 +55,101 @@ class RDFClass:
         self.type = "class"
         self.crosslink = None
 
-    def get_superclasses(self, g : Graph,):
+    def get_superclasses(
+        self,
+        g: Graph,
+    ):
         def get_superclasses_generator():
             for parent in g.query(
-                GET_SUPERCLASSES, initBindings={"lang": Literal(self.lang), "child": self.iri}
+                GET_SUPERCLASSES,
+                initBindings={"lang": Literal(self.lang), "child": self.iri},
             ):
-                super_class = RDFClass(self.lang, parent.iri, to_shortname(g, parent.iri), parent.label, parent.description)
+                super_class = RDFClass(
+                    self.lang,
+                    parent.iri,
+                    to_shortname(g, parent.iri),
+                    parent.label,
+                    parent.description,
+                )
                 super_class.get_properties(g)
                 yield super_class
+
         self.superclasses = list(get_superclasses_generator())
 
-    def get_subclasses(self, g : Graph, ):
+    def get_subclasses(
+        self,
+        g: Graph,
+    ):
         def get_subclasses_generator():
             for child in g.query(
-                GET_SUBCLASSES, initBindings={"lang": Literal(self.lang), "parent": self.iri}
+                GET_SUBCLASSES,
+                initBindings={"lang": Literal(self.lang), "parent": self.iri},
             ):
-                sub_class = RDFClass(self.lang, child.iri, to_shortname(g, child.iri), child.label, child.description)
+                sub_class = RDFClass(
+                    self.lang,
+                    child.iri,
+                    to_shortname(g, child.iri),
+                    child.label,
+                    child.description,
+                )
                 yield sub_class
+
         self.subclasses = list(get_subclasses_generator())
 
-    def get_properties(self, g : Graph, g_crosslinks : List[Graph] = []):
+    def get_properties(self, g: Graph, g_crosslinks: List[Graph] = []):
         def get_properties_generator():
             for prop in g.query(
-                GET_PROPERTIES, initBindings={"lang": Literal(self.lang), "targetClass": self.iri}
+                GET_PROPERTIES,
+                initBindings={"lang": Literal(self.lang), "targetClass": self.iri},
             ):
-                property = RDFProperty(prop.iri, to_shortname(g, prop.iri), prop.label, prop.description, prop.min, prop.max)
+                property = RDFProperty(
+                    prop.iri,
+                    to_shortname(g, prop.iri),
+                    prop.label,
+                    prop.description,
+                    prop.min,
+                    prop.max,
+                )
                 property.get_datatypes(g, prop.shape, self.lang, g_crosslinks)
                 if not property.datatypes and prop.kind == SHACL.IRI:
                     property.datatypes = [
-                        RDFDatatype("https://www.rfc-editor.org/rfc/rfc3987.txt", "IRI", "IRI")
+                        RDFDatatype(
+                            "https://www.rfc-editor.org/rfc/rfc3987.txt", "IRI", "IRI"
+                        )
                     ]
                 property.get_values(g, prop.shape, self.lang)
                 yield property
+
         self.properties = list(get_properties_generator())
 
-    def get_class_info(self, g : Graph,):
-        for row in g.query(GET_CLASS, initBindings={"lang": Literal(self.lang), "iri": self.iri}):
+    def get_class_info(
+        self,
+        g: Graph,
+    ):
+        for row in g.query(
+            GET_CLASS, initBindings={"lang": Literal(self.lang), "iri": self.iri}
+        ):
             self.label = row.label
             self.description = row.description
 
-    def check_crosslink(self, g : Graph, g_crosslinks : List[Graph] = []):
-        class_exists = g.query(CLASS_EXISTS_CHECK, initBindings={"iri": self.iri}).askAnswer
+    def check_crosslink(self, g: Graph, g_crosslinks: List[Graph] = []):
+        class_exists = g.query(
+            CLASS_EXISTS_CHECK, initBindings={"iri": self.iri}
+        ).askAnswer
         if g_crosslinks and (not class_exists or not self.label):
             for graph in g_crosslinks:
-                if graph.query(CLASS_EXISTS_CHECK, initBindings={"iri": self.iri}).askAnswer:
+                if graph.query(
+                    CLASS_EXISTS_CHECK, initBindings={"iri": self.iri}
+                ).askAnswer:
                     if not class_exists:
                         self.crosslink = graph.identifier
                     self.get_class_info(graph)
 
     # deep copy method
     def copy(self):
-        copy_class =  RDFClass(self.lang, self.iri, self.shortname, self.label, self.description)
+        copy_class = RDFClass(
+            self.lang, self.iri, self.shortname, self.label, self.description
+        )
         copy_class.properties = [prop.copy() for prop in self.properties]
         copy_class.subclasses = [sub.copy() for sub in self.subclasses]
         copy_class.superclasses = [sup.copy() for sup in self.superclasses]
@@ -114,7 +171,15 @@ class RDFClass:
 
 
 class RDFProperty:
-    def __init__(self, iri, shortname, label, description, min, max,):
+    def __init__(
+        self,
+        iri,
+        shortname,
+        label,
+        description,
+        min,
+        max,
+    ):
         self.iri = iri
         self.shortname = shortname
         self.label = label
@@ -124,25 +189,46 @@ class RDFProperty:
         self.datatypes = []
         self.value_list = []
 
-    def get_datatypes(self, g : Graph, s, lang : str, g_crosslinks: List[Graph] = []):
+    def get_datatypes(self, g: Graph, s, lang: str, g_crosslinks: List[Graph] = []):
         def get_datatypes_generator():
-            for dt in g.query(GET_DATATYPES, initBindings={"lang": Literal(lang), "shape": s}):
+            for dt in g.query(
+                GET_DATATYPES, initBindings={"lang": Literal(lang), "shape": s}
+            ):
                 if dt.type.toPython() == "datatype":
-                    yield RDFDatatype(dt.iri, to_shortname(g, dt.iri), dt.label,)
+                    yield RDFDatatype(
+                        dt.iri,
+                        to_shortname(g, dt.iri),
+                        dt.label,
+                    )
                 elif dt.type.toPython() == "class":
-                    dt_class= RDFClass(lang, dt.iri, to_shortname(g, dt.iri), dt.label)
+                    dt_class = RDFClass(lang, dt.iri, to_shortname(g, dt.iri), dt.label)
                     dt_class.check_crosslink(g, g_crosslinks)
-                    yield dt_class           
+                    yield dt_class
+
         self.datatypes = list(get_datatypes_generator())
 
-    def get_values(self, g : Graph, s, lang : str):
+    def get_values(self, g: Graph, s, lang: str):
         def get_values_generator():
-            for value in g.query(GET_VALUES, initBindings={"lang": Literal(lang), "shape": s}):
-                yield RDFValue(value.iri, to_shortname(g, value.iri), value.label,)
+            for value in g.query(
+                GET_VALUES, initBindings={"lang": Literal(lang), "shape": s}
+            ):
+                yield RDFValue(
+                    value.iri,
+                    to_shortname(g, value.iri),
+                    value.label,
+                )
+
         self.value_list = list(get_values_generator())
 
     def copy(self):
-        copy_prop = RDFProperty(self.iri, self.shortname, self.label, self.description, self.min, self.max,)
+        copy_prop = RDFProperty(
+            self.iri,
+            self.shortname,
+            self.label,
+            self.description,
+            self.min,
+            self.max,
+        )
         copy_prop.datatypes = [dt.copy() for dt in self.datatypes]
         copy_prop.value_list = [value.copy() for value in self.value_list]
 
@@ -158,13 +244,19 @@ class RDFProperty:
             "value_list": [value.to_dict() for value in self.value_list],
         }
 
+
 class RDFDatatype:
-    def __init__(self, iri, shortname, label,):
+    def __init__(
+        self,
+        iri,
+        shortname,
+        label,
+    ):
         self.iri = iri
         self.shortname = shortname
         self.label = label
         self.type = "datatype"
-    
+
     def copy(self):
         copy_dt = RDFDatatype(self.iri, self.shortname, self.label)
         return copy_dt
@@ -177,8 +269,14 @@ class RDFDatatype:
             "type": self.type,
         }
 
+
 class RDFValue:
-    def __init__(self, iri, shortname, label,):
+    def __init__(
+        self,
+        iri,
+        shortname,
+        label,
+    ):
         self.iri = iri
         self.shortname = shortname
         self.label = label
@@ -194,16 +292,18 @@ class RDFValue:
             "label": self.label,
         }
 
-def to_shortname(g : Graph, term):
+
+def to_shortname(g: Graph, term):
     return term.n3(g.namespace_manager) if term is not None else ""
 
 
-def get_doc(g : Graph, lang : str):
+def get_doc(g: Graph, lang: str):
     for row in g.query(GET_DOC_MD, initBindings={"lang": Literal(lang)}):
         row.authors = list(g.query(GET_AUTHORS))
         return row
 
-def get_classes(g : Graph, lang : str, g_crosslinks: List[Graph]):
+
+def get_classes(g: Graph, lang: str, g_crosslinks: List[Graph]):
     for c in g.query(GET_CLASSES, initBindings={"lang": Literal(lang)}):
         c = RDFClass(lang, c.iri, to_shortname(g, c.iri), c.label, c.description)
         c.check_crosslink(g, g_crosslinks)
@@ -212,15 +312,17 @@ def get_classes(g : Graph, lang : str, g_crosslinks: List[Graph]):
         c.get_superclasses(g)
         yield c.to_dict()
 
+
 def get_crosslink_graphs(crosslinks):
     for crosslink in crosslinks:
-            crosslink_name = crosslink.split(";")[0]
-            g_crosslink = Graph(identifier=crosslink_name)
-            for crosslink_file in crosslink.split(";")[1:]:
-                g_crosslink.parse(crosslink_file)
-            yield g_crosslink
+        crosslink_name = crosslink.split(";")[0]
+        g_crosslink = Graph(identifier=crosslink_name)
+        for crosslink_file in crosslink.split(";")[1:]:
+            g_crosslink.parse(crosslink_file)
+        yield g_crosslink
 
-def get_output_dir(args, lang : str, doc):
+
+def get_output_dir(args, lang: str, doc):
     output_dir = args.out
     output_dir_length = 1
     if args.vdir:
@@ -235,6 +337,7 @@ def get_output_dir(args, lang : str, doc):
         os.makedirs(output_dir)
     print(f"* Directory '{output_dir}' created")
     return output_dir, output_dir_length
+
 
 def generate_puml(args, output_dir, output_dir_length, namespaces, classes):
     puml_filename = f"{args.name}-diagram.puml"
@@ -273,7 +376,10 @@ def generate_puml(args, output_dir, output_dir_length, namespaces, classes):
     svg_text = etree.tostring(tree.getroot(), encoding="unicode", xml_declaration=False)
     return svg_text
 
-def generate_md(args, g, output_dir, output_dir_length, lang, doc, namespaces, classes, svg_text):
+
+def generate_md(
+    args, g, output_dir, output_dir_length, lang, doc, namespaces, classes, svg_text
+):
     # Dump RDF serialization to file
     rdf_filename = f"{args.name}.shacl.ttl"
     g.serialize(f"{output_dir}/{rdf_filename}")
@@ -289,7 +395,7 @@ def generate_md(args, g, output_dir, output_dir_length, lang, doc, namespaces, c
                 "title": doc.title,
                 "parent": args.parent,
                 "nav_order": args.nav_order,
-                "nav_exclude": args.language[0] != lang
+                "nav_exclude": args.language[0] != lang,
             },
             rdf_filename=rdf_filename,
             doc=doc,
@@ -303,20 +409,30 @@ def generate_md(args, g, output_dir, output_dir_length, lang, doc, namespaces, c
     )
     print(f"* File '{output_dir}/index.md' created")
 
-def generate(g : Graph, g_crosslinks: List[Graph], args, lang : str):
+
+def generate(g: Graph, g_crosslinks: List[Graph], args, lang: str):
     doc = get_doc(g, lang)
 
     # decide on output dir
     output_dir, output_dir_length = get_output_dir(args, lang, doc)
 
-    namespaces = g.namespace_manager.namespaces() 
+    namespaces = g.namespace_manager.namespaces()
 
     classes = list(get_classes(g, lang, g_crosslinks))
 
     svg_text = generate_puml(args, output_dir, output_dir_length, namespaces, classes)
     if svg_text:
-        generate_md(args, g, output_dir, output_dir_length, lang, doc, namespaces, classes, svg_text)
-    
+        generate_md(
+            args,
+            g,
+            output_dir,
+            output_dir_length,
+            lang,
+            doc,
+            namespaces,
+            classes,
+            svg_text,
+        )
 
 
 def main(args):
@@ -327,7 +443,7 @@ def main(args):
     print(args.name)
     print(f"Creating {args.name}")
     print("-----------------------------------------------")
-    
+
     if args.crosslinks:
         g_crosslinks = list(get_crosslink_graphs(args.crosslinks))
     else:
@@ -352,8 +468,6 @@ def main(args):
 
     for lang in args.language:
         generate(g, g_crosslinks, args, lang)
-
-
 
 
 if __name__ == "__main__":
