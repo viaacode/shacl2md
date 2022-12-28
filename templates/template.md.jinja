@@ -8,6 +8,27 @@
 {{doc.title}}
 ====================
 
+{% if lang == "nl" %}
+**Versie:** {{doc.version}}
+
+**Vorige versie:** {{doc.prior_version}}
+
+**Aangemaakt op:** {{doc.created}}
+
+**Laatst aangepast op:** {{doc.modified}}
+
+**SHACL-bestand:** [{{rdf_filename}}]({{rdf_filename}})
+
+**Andere talen:**
+{% for lang in languages %}
+{% if loop.index > 1 %}, {% endif %}[{{lang}}](../{{lang}})
+{% endfor %}
+
+**Auteurs:**
+{% for author in doc.authors %}
+{% if loop.index > 1 %}, {% endif %}[{{author.label}}](mailto:{{author.email}})
+{% endfor %}
+{% elif lang == "en" %}
 **Version:** {{doc.version}}
 
 **Prior version:** {{doc.prior_version}}
@@ -27,7 +48,27 @@
 {% for author in doc.authors %}
 {% if loop.index > 1 %}, {% endif %}[{{author.label}}](mailto:{{author.email}})
 {% endfor %}
+{% elif lang == "fr" %}
+**Version:** {{doc.version}}
 
+**Version précédente:** {{doc.prior_version}}
+
+**Créé:** {{doc.created}}
+
+**Dernière mise à jour:** {{doc.modified}}
+
+**Fichier SHACL:** [{{rdf_filename}}]({{rdf_filename}})
+
+**Autres langues:**
+{% for lang in languages %}
+{% if loop.index > 1 %}, {% endif %}[{{lang}}](../{{lang}})
+{% endfor %}
+
+**Auteurs:**
+{% for author in doc.authors %}
+{% if loop.index > 1 %}, {% endif %}[{{author.label}}](mailto:{{author.email}})
+{% endfor %}
+{% endif %}
 
 {{doc.description}}
 
@@ -37,7 +78,13 @@
   </div>
 </div>
 
+{% if lang == "nl" %}
+## Naamruimten
+{% elif lang == "en" %}
 ## Namespaces
+{% elif lang == "fr" %}
+## Espace de noms
+{% endif %}
 
 | Prefix | URI      |
 | :----- | :------- |
@@ -45,9 +92,21 @@
 | {{ prefix }}     | [{{iri}}]({{iri}}) |
 {% endfor %}
 
-## Classes & properties
+{% if lang == "nl" %}
+## Klassen & Eigenschappen
+{% elif lang == "en" %}
+## Classes & Properties
+{% elif lang == "fr" %}
+## Classes & Propriétés
+{% endif %}
 
+{% if lang == "nl" %}
+**Klassen:** 
+{% elif lang == "en" %}
 **Classes:** 
+{% elif lang == "fr" %}
+**Classes:** 
+{% endif %}
 {% for class in classes %}
 {% if loop.index > 1 %} | {% endif %} [{{class.label}}](#{{class.shortname|urlencode}})
 {% endfor %}
@@ -58,14 +117,26 @@
 {# **URI:** [{{class.shortname}}]({{class.iri}}) <br> #}
 {% if class.superclasses is defined and class.superclasses|length > 0 %}
 
+{% if lang == "nl" %}
+**Subklasse van:** 
+{% elif lang == "en" %}
 **Subclass of:** 
+{% elif lang == "fr" %}
+**Sous-classe de:** 
+{% endif %}
 {% for parent in class.superclasses %}
 [{{parent.label}}](#{{parent.shortname|urlencode}})
 {% endfor %}
 {% endif %}
 {% if class.subclasses is defined and class.subclasses|length > 0%}
 
+{% if lang == "nl" %}
+**Subklassen:** 
+{% elif lang == "en" %}
 **Subclasses:** 
+{% elif lang == "fr" %}
+**Sous-classes:** 
+{% endif %}
 {% for child in class.subclasses %}
 {% if loop.index > 1 %}, {% endif %}[{{child.label}}](#{{child.shortname|urlencode}})
 {% endfor %}
@@ -74,7 +145,13 @@
 {{class.description if class.description is not none }}
 
 {% if class.properties|length > 0%}
+{% if lang == "nl" %}
+| Eigenschap | Beschrijving | Kardinaliteit | Datatype |
+{% elif lang == "en" %}
 | Property | Description | Cardinality | Datatype |
+{% elif lang == "fr" %}
+| Propriété | Description | Cardinalité | Type de données |
+{% endif %}
 | :------ | :---------- | :---------- | :------- |
 {% for property in class.properties %}
 | <a id='{{property.shortname|urlencode}}'></a>{{property.label}} <br> <small>[({{property.shortname}})]({{property.iri}})</small> | {{property.description if property.description is not none}} | `{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}` | {% for datatype in property.datatypes -%}{% if loop.index > 1 %} _or_ {% endif %}{% if datatype.type == "class" %}[{{datatype.label}}](#{{datatype.shortname|urlencode}}){% else %}[`{{datatype.shortname}}`]({{datatype.iri}}){% endif %}{% endfor %} {% if property.value_list | length > 0 %}<br>_Possible values: {% for value in property.value_list -%}{% if loop.index > 1 %}, {% endif %}[`{{value.shortname}}`]({{value.iri}}){% endfor %}_{% endif %} |
@@ -83,7 +160,13 @@
 
 {% for parent in class.superclasses %}
 {% if parent.properties|length > 0 %}
+{% if lang == "nl" %}
+_Eigenschappen van [{{parent.label}}](#{{parent.shortname|urlencode}}):_ {% for property in parent.properties %}{% if loop.index > 1 %}, {% endif %} [{{property.label}}](#{{property.shortname|urlencode}}){% endfor %}
+{% elif lang == "en" %}
 _Properties from [{{parent.label}}](#{{parent.shortname|urlencode}}):_ {% for property in parent.properties %}{% if loop.index > 1 %}, {% endif %} [{{property.label}}](#{{property.shortname|urlencode}}){% endfor %}
+{% elif lang == "fr" %}
+_Propriétés de [{{parent.label}}](#{{parent.shortname|urlencode}}):_ {% for property in parent.properties %}{% if loop.index > 1 %}, {% endif %} [{{property.label}}](#{{property.shortname|urlencode}}){% endfor %}
+{% endif %}
 {% endif %}
 {% endfor %}
 
