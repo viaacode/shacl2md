@@ -242,6 +242,7 @@ def generate(g, args, lang):
             classes=classes,
             diagramText=svg_text,
             languages=other_languages,
+            lang=lang,
         ),
         file=open(f"{output_dir}/index.md", "w"),
     )
