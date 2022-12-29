@@ -22,7 +22,7 @@ from queries import (
     GET_SUPERCLASSES,
     GET_VALUES,
 )
-
+from lang_labels import get_lang_labels
 SHACL = Namespace("http://www.w3.org/ns/shacl#")
 
 env = Environment(
@@ -388,6 +388,9 @@ def generate_md(
     other_languages = list(args.language)
     other_languages.remove(lang)
 
+    # Get markdown labels
+    labels = get_lang_labels(lang)
+
     print(
         template.render(
             frontmatter={
@@ -404,6 +407,7 @@ def generate_md(
             diagramText=svg_text,
             languages=other_languages,
             output_dir_length=output_dir_length,
+            labels=labels,
         ),
         file=open(f"{output_dir}/index.md", "w"),
     )
@@ -482,7 +486,7 @@ if __name__ == "__main__":
         "--language",
         metavar="language",
         type=str,
-        default="nl",
+        default=["nl"],
         nargs="*",
         required=False,
         help='languages of generated documentation, default is "nl"',
