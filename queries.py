@@ -37,31 +37,50 @@ WHERE {
         ?iri rdfs:label ?label . 
      FILTER(lang(?label) = ?lang)
     }
-    OPTIONAL { 
-        ?iri rdfs:comment ?description . 
-        FILTER(lang(?description) = ?lang)
+    OPTIONAL {?iri rdfs:comment ?rdfsdescription
+        FILTER(lang(?rdfsdescription) = ?lang) 
     }
+    OPTIONAL {?iri skos:definition ?skosdefinition
+        FILTER(lang(?skosdefinition) = ?lang) 
+    }
+    BIND (
+        COALESCE(
+            IF(bound(?skosdefinition), ?skosdefinition, 1/0),
+            IF(bound(?rdfsdescription), ?rdfsdescription, 1/0)
+        ) AS ?description
+    )
 }
 """
 
 GET_CLASSES = """
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
 SELECT DISTINCT ?iri ?label ?description
 WHERE {
-    {
-    ?subjectclassNode sh:targetClass ?iri . 
-    } UNION {
-        ?property sh:or*/rdf:rest*/rdf:first*/sh:class ?iri .
-    }
+    {?subjectclassNode sh:targetClass ?iri . }
+    UNION
+    {?property sh:or*/rdf:rest*/rdf:first*/sh:class ?iri .}
+
     OPTIONAL { 
         ?iri rdfs:label ?label. 
      FILTER(lang(?label) = ?lang)
     }
-    OPTIONAL { 
-        ?iri rdfs:comment ?description. 
-        FILTER(lang(?description) = ?lang)
+    OPTIONAL {?iri rdfs:comment ?rdfsdescription
+        FILTER(lang(?rdfsdescription) = ?lang) 
     }
+    OPTIONAL {?iri skos:definition ?skosdefinition
+        FILTER(lang(?skosdefinition) = ?lang) 
+    }
+    BIND (
+        COALESCE(
+            IF(bound(?skosdefinition), ?skosdefinition, 1/0),
+            IF(bound(?rdfsdescription), ?rdfsdescription, 1/0)
+        ) AS ?description
+    )
 }
+ORDER BY ?label
 """
 
 GET_SUBCLASSES = """
