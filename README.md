@@ -27,7 +27,7 @@ usage: shacl2md.py [-h] [--language [language [language ...]]] [--out out] [--pa
 |`--layout`|`default`|Jekyll layout, default is "default"|
 |`--nav_order`|`1`|Jekyll nav order, default is 1|
 |`--name`|`output`|filename for the output file, default is "output"|
-|`--crosslinks`|`None`|crosslink graphs to find classes in: format is "name;file1;file2;..."|
+|`--crosslinks`|`None`|crosslink graphs to find classes in: format is "name1=file1,file2,... name2=file1,file2,..."|
 |`--vdir`||if present, outputs files to a directory based on the SHACL version|
 |`--validate`||if present, the shacl file is validated against the SHACL-SHACL.|
 |`--nodocs`||if present, only a diagram is produced.|
