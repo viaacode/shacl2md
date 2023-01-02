@@ -444,7 +444,7 @@ def main(args):
     g = Graph(bind_namespaces="none")
     for file in args.files:
         g.parse(file)
-    print(args.name)
+
     print(f"Creating {args.name}")
     print("-----------------------------------------------")
 
