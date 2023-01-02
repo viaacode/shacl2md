@@ -315,9 +315,9 @@ def get_classes(g: Graph, lang: str, g_crosslinks: List[Graph]):
 
 def get_crosslink_graphs(crosslinks):
     for crosslink in crosslinks:
-        crosslink_name = crosslink.split(";")[0]
+        crosslink_name, *crosslink_files = crosslink.split("=")
         g_crosslink = Graph(identifier=crosslink_name)
-        for crosslink_file in crosslink.split(";")[1:]:
+        for crosslink_file in crosslink_files[0].split(","):
             g_crosslink.parse(crosslink_file)
         yield g_crosslink
 
@@ -537,7 +537,7 @@ if __name__ == "__main__":
         type=str,
         nargs="*",
         required=False,
-        help='crosslink graphs to find classes in: format is "name;file1;file2;..."',
+        help='crosslink graphs to find classes in: format is "name1=file1,file2,...  name2=file1,file2,..."',
     )
     parser.add_argument(
         "--vdir",
