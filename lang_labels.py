@@ -16,7 +16,8 @@ LANG_LABELS= {
         "Description" : "Beschrijving",
         "Cardinality" : "Kardinaliteit",
         "Datatype" : "Datatype",
-        "Properties from" : "Eigenschappen van"
+        "Properties from" : "Eigenschappen van",
+        "or" : "of"
     },
     "en" : {
         "Version" : "Version",
@@ -35,7 +36,8 @@ LANG_LABELS= {
         "Description" : "Description",
         "Cardinality" : "Cardinality",
         "Datatype" : "Datatype",
-        "Properties from" : "Properties from"
+        "Properties from" : "Properties from",
+        "or" : "or"
     },
     "fr" : {
         "Version" : "Version",
@@ -54,7 +56,8 @@ LANG_LABELS= {
         "Description" : "Description",
         "Cardinality" : "Cardinalité",
         "Datatype" : "Type de données",
-        "Properties from" : "Propriétés de"
+        "Properties from" : "Propriétés de",
+        "or" : "ou"
     }
 }
 
