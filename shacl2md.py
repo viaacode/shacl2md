@@ -10,6 +10,7 @@ from rdflib.graph import Graph
 from rdflib.namespace import Namespace
 from rdflib.term import Literal
 
+from lang_labels import get_lang_labels
 from queries import (
     CLASS_EXISTS_CHECK,
     GET_AUTHORS,
@@ -22,7 +23,7 @@ from queries import (
     GET_SUPERCLASSES,
     GET_VALUES,
 )
-from lang_labels import get_lang_labels
+
 SHACL = Namespace("http://www.w3.org/ns/shacl#")
 
 env = Environment(
@@ -47,7 +48,7 @@ class RDFClass:
         self.lang: str = lang
         self.iri: str = iri
         self.shortname = shortname
-        self.label = label
+        self.label = label if label is not None else shortname.split(":",1)[1]
         self.description = description
         self.properties = []
         self.subclasses = []
