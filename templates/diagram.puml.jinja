@@ -19,7 +19,7 @@ top to bottom direction
 endlegend #}
 
 {% for class in classes %}
-class "{% if class.label %}<b>{{class.label}}</b> {% endif %}({{class.shortname}})" as {{class.shortname|replace(":","_")}} [[#{{class.shortname|urlencode}}]]
+class "{% if class.label %}<b>{{class.label}}</b> {% endif %}({{class.shortname}})" as {{class.shortname|replace(":","_")}} [[{% if class.crosslink %}../{% if output_dir_length == 2 %}../{% endif %}{{class.crosslink}}/{{class.lang}}{% endif %}#{{class.shortname|urlencode}}]]
 {% for superclass in class.superclasses %}
 {# {% if superclass in classes %} #}
 class "{% if superclass.label %}<b>{{superclass.label}}</b> {% endif %}({{superclass.shortname}})" as {{superclass.shortname|replace(":","_")}} [[#{{superclass.shortname|urlencode}}]]

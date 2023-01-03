@@ -4,26 +4,27 @@
 
 {% endfor %}
 ---
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;"><symbol id="svg-external-link" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-external-link"><title id="svg-external-link-title">(external link)</title><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line> </symbol></svg>
 
 {{doc.title}}
 ====================
 
-**Version:** {{doc.version}}
+**{{labels['Version']}}:** {{doc.version}}
 
-**Prior version:** {{doc.prior_version}}
+**{{labels['Prior version']}}:** {{doc.prior_version}}
 
-**Created:** {{doc.created}}
+**{{labels['Created']}}:** {{doc.created}}
 
-**Last modified:** {{doc.modified}}
+**{{labels['Last modified']}}:** {{doc.modified}}
 
-**SHACL file:** [{{rdf_filename}}]({{rdf_filename}})
+**{{labels['SHACL file']}}:** [{{rdf_filename}}]({{rdf_filename}})
 
-**Other languages:**
+**{{labels['Other languages']}}:**
 {% for lang in languages %}
 {% if loop.index > 1 %}, {% endif %}[{{lang}}](../{{lang}})
 {% endfor %}
 
-**Authors:**
+**{{labels['Authors']}}:**
 {% for author in doc.authors %}
 {% if loop.index > 1 %}, {% endif %}[{{author.label}}](mailto:{{author.email}})
 {% endfor %}
@@ -37,7 +38,7 @@
   </div>
 </div>
 
-## Namespaces
+## {{labels['Namespaces']}}
 
 | Prefix | URI      |
 | :----- | :------- |
@@ -45,27 +46,28 @@
 | {{ prefix }}     | [{{iri}}]({{iri}}) |
 {% endfor %}
 
-## Classes & properties
+## {{labels['Classes & Properties']}}
 
-**Classes:** 
+**{{labels['Classes']}}:** 
 {% for class in classes %}
-{% if loop.index > 1 %} | {% endif %} [{{class.label}}](#{{class.shortname|urlencode}})
+{% if loop.index > 1 %} | {% endif %} [{{class.label}}{% if class.crosslink %} <svg class="svg-external-link" viewBox="0 0 24 24" aria-labelledby="svg-external-link-title"><use xlink:href="#svg-external-link"></use></svg>](../{% if output_dir_length == 2 %}../{% endif %}{{class.crosslink}}/{{class.lang}}#{{class.shortname|urlencode}}){:target="_blank"}{% else %}](#{{class.shortname|urlencode}}){% endif %}
 {% endfor %}
 
 {% for class in classes %}
+{% if class.properties|length > 0%}
 ## <a id="{{class.shortname|urlencode}}"></a>{{class.label}} <small>[({{class.shortname}})]({{class.iri}})</small>
 
 {# **URI:** [{{class.shortname}}]({{class.iri}}) <br> #}
 {% if class.superclasses is defined and class.superclasses|length > 0 %}
 
-**Subclass of:** 
+**{{labels['Subclass of']}}:** 
 {% for parent in class.superclasses %}
 [{{parent.label}}](#{{parent.shortname|urlencode}})
 {% endfor %}
 {% endif %}
 {% if class.subclasses is defined and class.subclasses|length > 0%}
 
-**Subclasses:** 
+**{{labels['Subclasses']}}:** 
 {% for child in class.subclasses %}
 {% if loop.index > 1 %}, {% endif %}[{{child.label}}](#{{child.shortname|urlencode}})
 {% endfor %}
@@ -73,20 +75,20 @@
 
 {{class.description if class.description is not none }}
 
-{% if class.properties|length > 0%}
-| Property | Description | Cardinality | Datatype |
+| {{labels['Property']}} | {{labels['Description']}} | {{labels['Cardinality']}} | {{labels['Datatype']}} |
 | :------ | :---------- | :---------- | :------- |
 {% for property in class.properties %}
-| <a id='{{property.shortname|urlencode}}'></a>{{property.label}} <br> <small>[({{property.shortname}})]({{property.iri}})</small> | {{property.description if property.description is not none}} | `{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}` | {% for datatype in property.datatypes -%}{% if loop.index > 1 %} _or_ {% endif %}{% if datatype.type == "class" %}[{{datatype.label}}](#{{datatype.shortname|urlencode}}){% else %}[`{{datatype.shortname}}`]({{datatype.iri}}){% endif %}{% endfor %} {% if property.value_list | length > 0 %}<br>_Possible values: {% for value in property.value_list -%}{% if loop.index > 1 %}, {% endif %}[`{{value.shortname}}`]({{value.iri}}){% endfor %}_{% endif %} |
+| <a id='{{property.shortname|urlencode}}'></a>{{property.label}} <br> <small>[({{property.shortname}})]({{property.iri}})</small> | {{property.description if property.description is not none}} | `{{property.min if property.min is not none else '0'}}..{{property.max if property.max is not none else 'n'}}` | {% for datatype in property.datatypes -%}{% if loop.index > 1 %} _or_ {% endif %}{% if datatype.type == "class" %}[{{datatype.label}}{% if datatype.crosslink %} <svg class="svg-external-link" viewBox="0 0 24 24" aria-labelledby="svg-external-link-title"><use xlink:href="#svg-external-link"></use></svg>](../{% if output_dir_length == 2 %}../{% endif %}{{datatype.crosslink}}/{{datatype.lang}}#{{datatype.shortname|urlencode}}){:target="_blank"}{% else %}](#{{datatype.shortname|urlencode}}){% endif %}{% else %}[`{{datatype.shortname}}`]({{datatype.iri}}){% endif %}{% endfor %} {% if property.value_list | length > 0 %}<br>_Possible values: {% for value in property.value_list -%}{% if loop.index > 1 %}, {% endif %}[`{{value.shortname}}`]({{value.iri}}){% endfor %}_{% endif %} |
 {% endfor %}
-{% endif %}
 
 {% for parent in class.superclasses %}
 {% if parent.properties|length > 0 %}
-_Properties from [{{parent.label}}](#{{parent.shortname|urlencode}}):_ {% for property in parent.properties %}{% if loop.index > 1 %}, {% endif %} [{{property.label}}](#{{property.shortname|urlencode}}){% endfor %}
+_{{labels['Properties from']}} [{{parent.label}}](#{{parent.shortname|urlencode}}):_ {% for property in parent.properties %}{% if loop.index > 1 %}, {% endif %} [{{property.label}}](#{{property.shortname|urlencode}}){% endfor %}
 {% endif %}
-{% endfor %}
 
+
+{% endfor %}
+{% endif %}
 {% endfor %}
 
 <style>
@@ -115,7 +117,10 @@ _Properties from [{{parent.label}}](#{{parent.shortname|urlencode}}):_ {% for pr
 .zoom:hover {
   transform: scale(2.0); cursor: grab;
 }
-
+.svg-external-link {
+  width: 16px;
+  height: 16px;
+}
 </style>
 <script>
 var svg = document.querySelector('svg[zoomAndPan="magnify"]');
