@@ -17,7 +17,8 @@ LANG_LABELS= {
         "Cardinality" : "Kardinaliteit",
         "Datatype" : "Datatype",
         "Properties from" : "Eigenschappen van",
-        "or" : "of"
+        "or" : "of",
+        "Possible values" : "Mogelijke waarden"
     },
     "en" : {
         "Version" : "Version",
@@ -37,7 +38,8 @@ LANG_LABELS= {
         "Cardinality" : "Cardinality",
         "Datatype" : "Datatype",
         "Properties from" : "Properties from",
-        "or" : "or"
+        "or" : "or",
+        "Possible values" : "Possible values"
     },
     "fr" : {
         "Version" : "Version",
@@ -57,7 +59,8 @@ LANG_LABELS= {
         "Cardinality" : "Cardinalité",
         "Datatype" : "Type de données",
         "Properties from" : "Propriétés de",
-        "or" : "ou"
+        "or" : "ou",
+        "Possible values" : "Valeurs possibles"
     }
 }
 
