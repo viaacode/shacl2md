@@ -6,7 +6,7 @@ from typing import List
 from jinja2 import Environment, PackageLoader, select_autoescape
 from lxml import etree
 from plantuml import PlantUML
-from rdflib.graph import Graph
+from rdflib.graph import Graph, URIRef
 from rdflib.namespace import Namespace
 from rdflib.term import Literal
 
@@ -48,7 +48,7 @@ class RDFClass:
         self.lang: str = lang
         self.iri: str = iri
         self.shortname = shortname
-        self.label = label if label is not None else shortname.split(":",1)[1]
+        self.label = label if label is not None else shortname.split(":", 1)[1]
         self.description = description
         self.properties = []
         self.subclasses = []
@@ -327,7 +327,12 @@ def get_output_dir(args, lang: str, doc):
     output_dir = args.out
     output_dir_length = 1
     if args.vdir:
-        output_dir = f"{args.out}/{doc.version}"
+        if doc is None or doc.version is None:
+            print("* Version info not found; outputting in main directory.")
+            output_dir = args.out
+        else:
+            output_dir = f"{args.out}/{doc.version}"
+
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
         print(f"* Directory '{output_dir}' created")
@@ -415,8 +420,10 @@ def generate_md(
     print(f"* File '{output_dir}/index.md' created")
 
 
-def generate(g: Graph, g_crosslinks: List[Graph], args, lang: str):
+def generate(g: Graph, g_ont: Graph, g_crosslinks: List[Graph], args, lang: str):
     doc = get_doc(g, lang)
+
+    g = g + g_ont
 
     # decide on output dir
     output_dir, output_dir_length = get_output_dir(args, lang, doc)
@@ -441,13 +448,20 @@ def generate(g: Graph, g_crosslinks: List[Graph], args, lang: str):
 
 
 def main(args):
-    # TODO: from rdflib 6.1.2, use bind_namespaces="none"
-    g = Graph(bind_namespaces="none")
-    for file in args.files:
-        g.parse(file)
-
     print(f"Creating {args.name}")
     print("-----------------------------------------------")
+
+    g = Graph()
+    print(f"Shape files:")
+    for file in args.files:
+        print(f"- {file}")
+        g.parse(file)
+
+    g_ont = Graph()
+    print(f"Ontology files:")
+    for ont_file in args.ontology:
+        print(f"- {ont_file}")
+        g_ont.parse(ont_file)
 
     if args.crosslinks:
         g_crosslinks = list(get_crosslink_graphs(args.crosslinks))
@@ -472,7 +486,7 @@ def main(args):
             quit()
 
     for lang in args.language:
-        generate(g, g_crosslinks, args, lang)
+        generate(g, g_ont, g_crosslinks, args, lang)
 
 
 if __name__ == "__main__":
@@ -481,7 +495,15 @@ if __name__ == "__main__":
         "files",
         metavar="inputFile",
         nargs="+",
-        help="SHACL OR RDFS files to construct Markdown documentation of.",
+        help="SHACL shape files to construct Markdown documentation of.",
+    )
+    parser.add_argument(
+        "--ontology",
+        metavar="ontology",
+        type=str,
+        nargs="*",
+        default=[],
+        help="RDFS files to include with the SHACL shapes, e.g., class definitions or reasoning.",
     )
     parser.add_argument(
         "--language",
