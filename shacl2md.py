@@ -451,13 +451,13 @@ def main(args):
     print(f"Creating {args.name}")
     print("-----------------------------------------------")
 
-    g = Graph()
+    g = Graph(bind_namespaces="none")
     print(f"Shape files:")
     for file in args.files:
         print(f"- {file}")
         g.parse(file)
 
-    g_ont = Graph()
+    g_ont = Graph(bind_namespaces="none")
     print(f"Ontology files:")
     for ont_file in args.ontology:
         print(f"- {ont_file}")
