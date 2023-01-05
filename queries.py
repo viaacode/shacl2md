@@ -14,6 +14,7 @@ WHERE {
         FILTER(lang(?description) = ?lang)
     }
 }
+LIMIT 1
 """
 
 
@@ -212,6 +213,7 @@ WHERE {
     } 
 }
 """
+
 CLASS_EXISTS_CHECK = """
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX sh: <http://www.w3.org/ns/shacl#> 
