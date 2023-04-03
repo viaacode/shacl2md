@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 from itertools import groupby
 from typing import List
@@ -11,18 +12,9 @@ from rdflib.namespace import Namespace
 from rdflib.term import Literal
 
 from lang_labels import get_lang_labels
-from queries import (
-    CLASS_EXISTS_CHECK,
-    GET_AUTHORS,
-    GET_CLASS,
-    GET_CLASSES,
-    GET_DATATYPES,
-    GET_DOC_MD,
-    GET_PROPERTIES,
-    GET_SUBCLASSES,
-    GET_SUPERCLASSES,
-    GET_VALUES,
-)
+from queries import (CLASS_EXISTS_CHECK, GET_AUTHORS, GET_CLASS, GET_CLASSES,
+                     GET_DATATYPES, GET_DOC_MD, GET_PROPERTIES, GET_SUBCLASSES,
+                     GET_SUPERCLASSES, GET_VALUES)
 
 SHACL = Namespace("http://www.w3.org/ns/shacl#")
 
@@ -110,6 +102,7 @@ class RDFClass:
                     prop.description,
                     prop.min,
                     prop.max,
+                    prop.uniqueLang,
                 )
                 property.get_datatypes(g, prop.shape, self.lang, g_crosslinks)
                 if not property.datatypes and prop.kind == SHACL.IRI:
@@ -157,18 +150,7 @@ class RDFClass:
         return copy_class
 
     def to_dict(self):
-        return {
-            "lang": self.lang,
-            "iri": self.iri,
-            "shortname": self.shortname,
-            "label": self.label,
-            "description": self.description,
-            "properties": [prop.to_dict() for prop in self.properties],
-            "subclasses": [sub.to_dict() for sub in self.subclasses],
-            "superclasses": [sup.to_dict() for sup in self.superclasses],
-            "type": self.type,
-            "crosslink": self.crosslink,
-        }
+        return json.loads(json.dumps(self, default=lambda o: o.__dict__))
 
 
 class RDFProperty:
@@ -180,6 +162,7 @@ class RDFProperty:
         description,
         min,
         max,
+        uniqueLang,
     ):
         self.iri = iri
         self.shortname = shortname
@@ -187,6 +170,7 @@ class RDFProperty:
         self.description = description
         self.min = min
         self.max = max
+        self.uniqueLang = uniqueLang
         self.datatypes = []
         self.value_list = []
 
@@ -234,16 +218,7 @@ class RDFProperty:
         copy_prop.value_list = [value.copy() for value in self.value_list]
 
     def to_dict(self):
-        return {
-            "iri": self.iri,
-            "shortname": self.shortname,
-            "label": self.label,
-            "description": self.description,
-            "min": self.min,
-            "max": self.max,
-            "datatypes": [dt.to_dict() for dt in self.datatypes],
-            "value_list": [value.to_dict() for value in self.value_list],
-        }
+        return json.loads(json.dumps(self, default=lambda o: o.__dict__))
 
 
 class RDFDatatype:
@@ -263,12 +238,7 @@ class RDFDatatype:
         return copy_dt
 
     def to_dict(self):
-        return {
-            "iri": self.iri,
-            "shortname": self.shortname,
-            "label": self.label,
-            "type": self.type,
-        }
+        return json.loads(json.dumps(self, default=lambda o: o.__dict__))
 
 
 class RDFValue:
@@ -287,11 +257,7 @@ class RDFValue:
         return copy_value
 
     def to_dict(self):
-        return {
-            "iri": self.iri,
-            "shortname": self.shortname,
-            "label": self.label,
-        }
+        return json.loads(json.dumps(self, default=lambda o: o.__dict__))
 
 
 def to_shortname(g: Graph, term):
