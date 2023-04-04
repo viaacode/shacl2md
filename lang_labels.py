@@ -18,7 +18,8 @@ LANG_LABELS= {
         "Datatype" : "Datatype",
         "Properties from" : "Eigenschappen van",
         "or" : "of",
-        "Possible values" : "Mogelijke waarden"
+        "Possible values" : "Mogelijke waarden",
+        "Unique language tags required" : "Unieke taallabels vereist",
     },
     "en" : {
         "Version" : "Version",
@@ -39,7 +40,8 @@ LANG_LABELS= {
         "Datatype" : "Datatype",
         "Properties from" : "Properties from",
         "or" : "or",
-        "Possible values" : "Possible values"
+        "Possible values" : "Possible values",
+        "Unique language tags required" : "Unique language tags required",
     },
     "fr" : {
         "Version" : "Version",
@@ -60,7 +62,8 @@ LANG_LABELS= {
         "Datatype" : "Type de données",
         "Properties from" : "Propriétés de",
         "or" : "ou",
-        "Possible values" : "Valeurs possibles"
+        "Possible values" : "Valeurs possibles",
+        "Unique language tags required" : "Étiquettes de langue uniques requises",
     }
 }
 
