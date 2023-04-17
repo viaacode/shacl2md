@@ -124,7 +124,7 @@ ORDER BY ?label
 GET_PROPERTIES = """
 PREFIX sh: <http://www.w3.org/ns/shacl#>
 PREFIX schema: <http://schema.org/>
-SELECT DISTINCT ?shape ?iri ?label ?description ?min ?max ?kind
+SELECT DISTINCT ?shape ?iri ?label ?description ?min ?max ?kind ?uniqueLang
 WHERE {
     ?subjectclassNode sh:targetClass ?targetClass .
     ?subjectclassNode sh:property ?shape.
@@ -167,6 +167,7 @@ WHERE {
     # Cardinality
     OPTIONAL {?shape sh:minCount ?min}
     OPTIONAL {?shape sh:maxCount ?max}
+    OPTIONAL {?shape sh:uniqueLang ?uniqueLang}
 
     OPTIONAL {
         ?shape sh:nodeKind ?kind
