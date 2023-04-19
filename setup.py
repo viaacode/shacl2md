@@ -8,7 +8,6 @@ with open("README.md") as readme_file:
 
 setup(
     name=" shacl2md",
-    version="0.1",
     description="Generates datamodel documentation from SHACL and/or RDFS files. ",
     license="MIT License",
     author="Lennert Van de Velde",
