@@ -11,3 +11,5 @@ Shacl2md
 ## Modules
 
 - [Generator](./generator.md)
+- [Templates](templates/index.md)
+- [Utilities](utilities/index.md)
