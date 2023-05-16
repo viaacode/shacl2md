@@ -134,7 +134,6 @@ class ShaclMarkdownGenerator:
             ... )
         """
 
-        # check if shacl-shacl validation is required
 
         shacl_graphs : List[ShaclGraph] = []
         # parse shacl files to graphs
@@ -143,6 +142,7 @@ class ShaclMarkdownGenerator:
             g.parse(shacl_filename)
             self.graphs[shacl] = g
 
+        for shacl in self.graphs.keys():
             for lang in self.languages:
                 shacl_graph = ShaclGraph(
                     shacl,
@@ -150,8 +150,8 @@ class ShaclMarkdownGenerator:
                     self
                 )
                 shacl_graphs.append(shacl_graph)
-                if self.shacl_shacl_validation:
-                    shacl_graph.validate()
+            if self.shacl_shacl_validation:
+                shacl_graph.validate()
         
         for shacl_graph in shacl_graphs:
             shacl_graph.generate_md()
