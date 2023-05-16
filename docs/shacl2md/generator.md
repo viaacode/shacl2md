@@ -19,7 +19,7 @@ Generator
 
 ## ShaclGraph
 
-[Show source in generator.py:143](../../shacl2md/generator.py#L143)
+[Show source in generator.py:160](../../shacl2md/generator.py#L160)
 
 #### Signature
 
@@ -35,7 +35,7 @@ class ShaclGraph:
 
 ### ShaclGraph().generate_md
 
-[Show source in generator.py:209](../../shacl2md/generator.py#L209)
+[Show source in generator.py:226](../../shacl2md/generator.py#L226)
 
 Generate markdown documentation from the SHACL graph.
 
@@ -48,7 +48,7 @@ def generate_md(self):
 
 ### ShaclGraph().generate_puml
 
-[Show source in generator.py:172](../../shacl2md/generator.py#L172)
+[Show source in generator.py:189](../../shacl2md/generator.py#L189)
 
 Generate a PlantUML diagram from the SHACL graph.
 
@@ -61,7 +61,7 @@ def generate_puml(self):
 
 ### ShaclGraph().validate
 
-[Show source in generator.py:285](../../shacl2md/generator.py#L285)
+[Show source in generator.py:302](../../shacl2md/generator.py#L302)
 
 Validate the SHACL graph against the SHACL specification.
 
@@ -110,6 +110,26 @@ Generate markdown documentation from SHACL files.
 #### Raises
 
 - `ValidationFailure` *pyshacl.errors.ValidationFailure* - Raised when the SHACL files do not validate against the SHACL specification.
+
+#### Examples
+
+```python
+>>> from shacl2md import ShaclMarkdownGenerator
+>>> sh_md = ShaclMarkdownGenerator(
+...     ["nl", "en", "fr"],
+...     "./output",
+...     shacl_shacl_validation=True,
+...     version_directory=True,
+...     crosslink_between_graphs=True,
+...     ontology_graphs=[
+...         "/path_to_ontology/rdfs.ttl",
+...     ]
+... )
+>>> sh_md.generate(
+...     organizations="/path_to_shacl/organizations.shacl.ttl",
+...     description="/path_to_shacl/description.shacl.ttl",
+... )
+```
 
 #### Signature
 

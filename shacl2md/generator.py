@@ -115,6 +115,23 @@ class ShaclMarkdownGenerator:
 
         Raises:
             ValidationFailure (pyshacl.errors.ValidationFailure): Raised when the SHACL files do not validate against the SHACL specification.
+
+        Examples:
+            >>> from shacl2md import ShaclMarkdownGenerator
+            >>> sh_md = ShaclMarkdownGenerator(
+            ...     ["nl", "en", "fr"],
+            ...     "./output",
+            ...     shacl_shacl_validation=True,
+            ...     version_directory=True,
+            ...     crosslink_between_graphs=True,
+            ...     ontology_graphs=[
+            ...         "/path_to_ontology/rdfs.ttl",
+            ...     ]
+            ... )
+            >>> sh_md.generate(
+            ...     organizations="/path_to_shacl/organizations.shacl.ttl",
+            ...     description="/path_to_shacl/description.shacl.ttl",
+            ... )
         """
 
         # check if shacl-shacl validation is required
