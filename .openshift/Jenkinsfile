@@ -84,7 +84,7 @@ void setGitHubBuildStatus(String message, String state) {
         statusResultSource: [ $class: 'ConditionalStatusResultSource', results: [[$class: 'AnyBuildResult', message: message, state: state]] ]
     ])
 }
-void runInPythonContainer(String commands, String requirements_file = 'requirements.txt', String post_comands) {
+void runInPythonContainer(String commands, String requirements_file = 'requirements.txt', String post_commands) {
     docker.image("${BASE_IMG_NAME}:3.8-slim-buster") {
         sh """#!/bin/bash
         pip3 install -r $requirements_file --extra-index-url http://do-prd-mvn-01.do.viaa.be:8081/repository/pypi-all/simple --trusted-host do-prd-mvn-01.do.viaa.be
