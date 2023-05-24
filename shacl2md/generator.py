@@ -114,7 +114,7 @@ class ShaclMarkdownGenerator:
         Generate markdown documentation from SHACL files.
 
         Args:
-            **shacls: Dictionary of SHACL files to generate documentation for. The key is the name of the SHACL graph, the value is the filename of the SHACL file.
+            **shacls: Dictionary of SHACL files or Graphs to generate documentation for. The key is the name of the SHACL graph, the value is the filename of the SHACL file.
 
         Raises:
             ValidationFailure (pyshacl.errors.ValidationFailure): Raised when the SHACL files do not validate against the SHACL specification.
@@ -140,9 +140,12 @@ class ShaclMarkdownGenerator:
 
         shacl_graphs : List[ShaclGraph] = []
         # parse shacl files to graphs
-        for shacl, shacl_filename in shacls.items():
+        for shacl, shacl_filename_or_graph in shacls.items():
             g = Graph(identifier=shacl, bind_namespaces="none")
-            g.parse(shacl_filename)
+            if isinstance(shacl_filename_or_graph, str):
+                g.parse(shacl_filename_or_graph)
+            elif isinstance(shacl_filename_or_graph, Graph):
+                g += shacl_filename_or_graph
             self.graphs[shacl] = g
 
         for shacl in self.graphs.keys():

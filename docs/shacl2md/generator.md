@@ -19,7 +19,7 @@ Generator
 
 ## ShaclGraph
 
-[Show source in generator.py:163](../../shacl2md/generator.py#L163)
+[Show source in generator.py:166](../../shacl2md/generator.py#L166)
 
 #### Signature
 
@@ -35,7 +35,7 @@ class ShaclGraph:
 
 ### ShaclGraph().generate_md
 
-[Show source in generator.py:229](../../shacl2md/generator.py#L229)
+[Show source in generator.py:232](../../shacl2md/generator.py#L232)
 
 Generate markdown documentation from the SHACL graph.
 
@@ -48,7 +48,7 @@ def generate_md(self):
 
 ### ShaclGraph().generate_puml
 
-[Show source in generator.py:192](../../shacl2md/generator.py#L192)
+[Show source in generator.py:195](../../shacl2md/generator.py#L195)
 
 Generate a PlantUML diagram from the SHACL graph.
 
@@ -61,7 +61,7 @@ def generate_puml(self):
 
 ### ShaclGraph().validate
 
-[Show source in generator.py:305](../../shacl2md/generator.py#L305)
+[Show source in generator.py:308](../../shacl2md/generator.py#L308)
 
 Validate the SHACL graph against the SHACL specification.
 
@@ -139,7 +139,7 @@ Generate markdown documentation from SHACL files.
 
 #### Arguments
 
-- `**shacls` - Dictionary of SHACL files to generate documentation for. The key is the name of the SHACL graph, the value is the filename of the SHACL file.
+- `**shacls` - Dictionary of SHACL files or Graphs to generate documentation for. The key is the name of the SHACL graph, the value is the filename of the SHACL file.
 
 #### Raises
 
