@@ -12,27 +12,10 @@ from rdflib.namespace import Namespace
 from rdflib.term import Literal
 
 from shacl2md.utilities.lang_labels import get_lang_labels
-from shacl2md.utilities.queries import (CLASS_EXISTS_CHECK, GET_AUTHORS,
-                                        GET_CLASS, GET_CLASSES, GET_DATATYPES,
-                                        GET_DOC_MD, GET_PROPERTIES,
-                                        GET_SUBCLASSES, GET_SUPERCLASSES,
-                                        GET_VALUES)
+from shacl2md.utilities.queries import GET_AUTHORS, GET_CLASSES, GET_DOC_MD
 from shacl2md.utilities.rdf import RDFClass, to_shortname
 
 SHACL = Namespace("http://www.w3.org/ns/shacl#")
-
-env = Environment(
-    loader=PackageLoader("shacl2md"),
-    autoescape=select_autoescape(),
-    trim_blocks=True,
-)
-
-template = env.get_template("template.md.jinja")
-puml_template = env.get_template("diagram.puml.jinja")
-
-
-
-
 
 class ShaclMarkdownGenerator: 
 
@@ -79,6 +62,13 @@ class ShaclMarkdownGenerator:
                 self.ontology_graph.parse(ontology_graph)
             elif isinstance(ontology_graph, Graph):
                 self.ontology_graph += ontology_graph
+        self.env = Environment(
+                        loader=PackageLoader("shacl2md"),
+                        autoescape=select_autoescape(),
+                        trim_blocks=True,
+                    )
+        self.template = self.env.get_template("template.md.jinja")
+        self.puml_template = self.env.get_template("diagram.puml.jinja")
 
     def get_graph(self, graph_name: str):
         """
@@ -201,7 +191,7 @@ class ShaclGraph:
 
         # Generate PUML diagram
         print(
-            puml_template.render(
+            self.generator.puml_template.render(
                 namespaces=self.namespaces,
                 classes=self.classes,
                 output_dir_length=self.output_dir_length,
@@ -245,7 +235,7 @@ class ShaclGraph:
         labels = get_lang_labels(self.lang)
 
         print(
-            template.render(
+            self.generator.template.render(
                 frontmatter={
                     "layout": self.generator.jekyll_layout,
                     "title": self.doc.title,
