@@ -1,0 +1,95 @@
+pipeline {
+    agent { label 'node' }
+    options {
+        timeout(time: 45, unit: 'MINUTES')
+        disableConcurrentBuilds()
+    }
+    environment {
+        OC_PROJECT = 'python-libraries'
+        BASE_IMG_NAME = 'python'
+        OC_URL = 'https://c113-e.private.eu-de.containers.cloud.ibm.com:30227'
+        JIRA_URL = 'meemoo.atlassian.net'
+        APP_NAME = 'shacl2md'
+    }
+
+    stages {
+        stage('Calculate extra ENV vars') {
+            steps {
+                script {
+                    env.GIT_SHORT_COMMIT = sh(script: "printf \$(git rev-parse --short ${GIT_COMMIT})", returnStdout: true)
+                    env.GIT_TAG = sh(script: 'git tag | tail -1', returnStdout: true)
+                    env.IMAGE_TAG = sh(script: 'git describe --tags || echo latest', returnStdout: true)
+                    // The name used for the build config based on the image tag
+                    // Replace '.' with '_' as '.' is not allowed.
+                    env.BUILD_CONFIG_NAME = sh(script: 'echo "${IMAGE_TAG}" | sed -r "s/\\./\\-/g"', returnStdout: true)
+                    env.DOCKER_IMAGE = sh(script: 'echo "${APP_NAME}:${GIT_SHORT_COMMIT}"')
+                }
+            }
+        }
+        stage('Test code') {
+            steps {
+                sh 'echo "No tests implemented"'
+            }
+        }
+        stage('Build and publish python package') {
+            when {
+                buildingTag()
+            }
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'nexus_username', variable: 'NEXUS_USERNAME'), string(credentialsId: 'nexus_password', variable: 'NEXUS_PASSWORD')]) {
+                        runInPythonContainer("python setup.py sdist bdist_wheel --new-version ${GIT_TAG}", "requirements-deploy.txt" , "twine upload dist/* --repository-url http://do-prd-mvn-01.do.viaa.be:8081/repository/pypi-internal/ -u ${NEXUS_USERNAME} -p ${NEXUS_PASSWORD} --non-interactive")
+                    }
+                }
+
+            }
+        }
+    }
+    post {
+        success {
+            script {
+                if (env.BRANCH_NAME.startsWith('PR')) {
+                    setGitHubBuildStatus('Build', 'SUCCESS')
+                }
+            }
+        }
+        failure {
+            script {
+                if (env.BRANCH_NAME.startsWith('PR')) {
+                    setGitHubBuildStatus('Build', 'FAILURE')
+                }
+            }
+        }
+        always {
+            jiraSendBuildInfo site: "${JIRA_URL}"
+            // Archive test results
+            script {
+                sh "docker image prune -af"
+                if (fileExists('./tests/test_results.xml')) {
+                    junit 'tests/test_results.xml'
+                } else {
+                    echo 'No test results found'
+                }
+            }
+        }
+    }
+}
+
+void setGitHubBuildStatus(String message, String state) {
+    step([
+        $class: 'GitHubCommitStatusSetter',
+        reposSource: [$class: 'ManuallyEnteredRepositorySource', url: "${GIT_URL}"],
+        commitShaSource: [$class: 'ManuallyEnteredShaSource', sha: "${GIT_COMMIT}"],
+        errorHandlers: [[$class: 'ChangingBuildStatusErrorHandler', result: 'UNSTABLE']],
+        statusResultSource: [ $class: 'ConditionalStatusResultSource', results: [[$class: 'AnyBuildResult', message: message, state: state]] ]
+    ])
+}
+void runInPythonContainer(String commands, String requirements_file = 'requirements.txt') {
+    docker.image("${BASE_IMG_NAME}:3.8-slim-buster") {
+        sh """#!/bin/bash
+        pip3 install -r $requirements_file --extra-index-url http://do-prd-mvn-01.do.viaa.be:8081/repository/pypi-all/simple --trusted-host do-prd-mvn-01.do.viaa.be
+        unset HTTPS_PROXY HTTP_PROXY http_proxy https_proxy
+        $commands
+        """
+    }
+}
