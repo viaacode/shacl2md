@@ -1,0 +1,1 @@
+from shacl2md.generator import ShaclMarkdownGenerator

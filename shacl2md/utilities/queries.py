@@ -127,7 +127,7 @@ PREFIX schema: <http://schema.org/>
 SELECT DISTINCT ?shape ?iri ?label ?description ?min ?max ?kind ?uniqueLang
 WHERE {
     ?subjectclassNode sh:targetClass ?targetClass .
-    ?subjectclassNode sh:property ?shape.
+    ?subjectclassNode sh:or*/rdf:rest*/rdf:first*/sh:property ?shape .
     ?shape sh:path ?iri.
 
     # Label
