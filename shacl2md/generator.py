@@ -1,7 +1,7 @@
 import argparse
 import os
 from itertools import groupby
-from typing import List
+from typing import List, Union
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 from lxml import etree
@@ -46,7 +46,7 @@ class ShaclMarkdownGenerator:
         jekyll_parent_page : str = "index",
         jekyll_layout : str = "default",
         jekyll_nav_order : int = 1,
-        ontology_graphs : List[str] = [],
+        ontology_graphs : List[Union[str, Graph]] = [],
         ):
         """
         A shacl markdown generator object.
@@ -60,7 +60,7 @@ class ShaclMarkdownGenerator:
             jekyll_parent_page (str, optional): Jekyll parent page. Defaults to "index".
             jekyll_layout (str, optional): Jekyll layout. Defaults to "default".
             jekyll_nav_order (int, optional): Jekyll nav order. Defaults to 1.
-            ontology_graphs (List[str], optional): List of ontology files to include with the SHACL shapes, e.g., class definitions or reasoning. Defaults to [].
+            ontology_graphs (List[str | Graph], optional): List of ontology files or Graphs, to include with the SHACL shapes, e.g., class definitions or reasoning. Defaults to [].
         """
 
         self.languages : List[str] = languages
@@ -75,7 +75,10 @@ class ShaclMarkdownGenerator:
         self.graphs :  dict = {}
         self.ontology_graph : Graph = Graph(identifier="ontology_graph", bind_namespaces="none")
         for ontology_graph in ontology_graphs:
-            self.ontology_graph.parse(ontology_graph)
+            if isinstance(ontology_graph, str):
+                self.ontology_graph.parse(ontology_graph)
+            elif isinstance(ontology_graph, Graph):
+                self.ontology_graph += ontology_graph
 
     def get_graph(self, name: str):
         """
