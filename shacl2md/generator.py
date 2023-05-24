@@ -80,16 +80,16 @@ class ShaclMarkdownGenerator:
             elif isinstance(ontology_graph, Graph):
                 self.ontology_graph += ontology_graph
 
-    def get_graph(self, name: str):
+    def get_graph(self, graph_name: str):
         """
         Get a graph by name.
 
         Args:
-            name (str): Name of the graph to get.
+            graph_name (str): Name of the graph to get.
         """
-        return self.graphs[name]
+        return self.graphs[graph_name]
 
-    def get_other_languages(self, lang: str):
+    def filter_language(self, lang: str):
         """
         Get all other languages.
 
@@ -98,14 +98,14 @@ class ShaclMarkdownGenerator:
         """
         return list(filter(lambda l: l != lang, self.languages))
 
-    def get_other_graphs(self, name: str):
+    def filter_graph(self, graph_name: str):
         """
         Get all other graphs.
 
         Args:
-            name (str): Name of the graph to filter.
+            graph_name (str): Name of the graph to filter.
         """
-        return [g for n, g in self.graphs.items() if n != name]
+        return [g for n, g in self.graphs.items() if n != graph_name]
 
     def generate(
         self, 
@@ -236,7 +236,7 @@ class ShaclGraph:
         self.graph.serialize(f"{self.output_dir}/{rdf_filename}")
         print(f"* File '{self.output_dir}/{rdf_filename}' created")
 
-        other_languages = self.generator.get_other_languages(self.lang)
+        other_languages = self.generator.filter_language(self.lang)
 
         # Get markdown labels
         labels = get_lang_labels(self.lang)
@@ -266,7 +266,7 @@ class ShaclGraph:
     def _get_classes(self):
         crosslink_graphs = []
         if self.generator.crosslink_between_graphs:
-            crosslink_graphs = self.generator.get_other_graphs(self.name)
+            crosslink_graphs = self.generator.filter_graph(self.name)
         for c in self.graph.query(GET_CLASSES, initBindings={"lang": Literal(self.lang)}):
             c = RDFClass(self.lang, c.iri, to_shortname(self.graph, c.iri), c.label, c.description)
             c.check_crosslink(self.graph, crosslink_graphs)
