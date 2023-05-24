@@ -44,4 +44,4 @@ sh_md.generate(organization="/datamodels/organizations/organizations.shacl.ttl",
 ```
 
 ## Result example
-[developer.meemoo.be](developer.meemoo.be)
+[developer.meemoo.be](https://developer.meemoo.be/)
