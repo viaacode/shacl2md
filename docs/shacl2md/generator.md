@@ -19,7 +19,7 @@ Generator
 
 ## ShaclGraph
 
-[Show source in generator.py:166](../../shacl2md/generator.py#L166)
+[Show source in generator.py:156](../../shacl2md/generator.py#L156)
 
 #### Signature
 
@@ -35,7 +35,7 @@ class ShaclGraph:
 
 ### ShaclGraph().generate_md
 
-[Show source in generator.py:232](../../shacl2md/generator.py#L232)
+[Show source in generator.py:222](../../shacl2md/generator.py#L222)
 
 Generate markdown documentation from the SHACL graph.
 
@@ -48,7 +48,7 @@ def generate_md(self):
 
 ### ShaclGraph().generate_puml
 
-[Show source in generator.py:195](../../shacl2md/generator.py#L195)
+[Show source in generator.py:185](../../shacl2md/generator.py#L185)
 
 Generate a PlantUML diagram from the SHACL graph.
 
@@ -61,7 +61,7 @@ def generate_puml(self):
 
 ### ShaclGraph().validate
 
-[Show source in generator.py:308](../../shacl2md/generator.py#L308)
+[Show source in generator.py:298](../../shacl2md/generator.py#L298)
 
 Validate the SHACL graph against the SHACL specification.
 
@@ -76,7 +76,7 @@ def validate(self):
 
 ## ShaclMarkdownGenerator
 
-[Show source in generator.py:37](../../shacl2md/generator.py#L37)
+[Show source in generator.py:20](../../shacl2md/generator.py#L20)
 
 #### Signature
 
@@ -99,7 +99,7 @@ class ShaclMarkdownGenerator:
 
 ### ShaclMarkdownGenerator().filter_graph
 
-[Show source in generator.py:101](../../shacl2md/generator.py#L101)
+[Show source in generator.py:91](../../shacl2md/generator.py#L91)
 
 Get all other graphs.
 
@@ -116,7 +116,7 @@ def filter_graph(self, graph_name: str):
 
 ### ShaclMarkdownGenerator().filter_language
 
-[Show source in generator.py:92](../../shacl2md/generator.py#L92)
+[Show source in generator.py:82](../../shacl2md/generator.py#L82)
 
 Get all other languages.
 
@@ -133,7 +133,7 @@ def filter_language(self, lang: str):
 
 ### ShaclMarkdownGenerator().generate
 
-[Show source in generator.py:110](../../shacl2md/generator.py#L110)
+[Show source in generator.py:100](../../shacl2md/generator.py#L100)
 
 Generate markdown documentation from SHACL files.
 
@@ -174,7 +174,7 @@ def generate(self, **shacls) -> None:
 
 ### ShaclMarkdownGenerator().get_graph
 
-[Show source in generator.py:83](../../shacl2md/generator.py#L83)
+[Show source in generator.py:73](../../shacl2md/generator.py#L73)
 
 Get a graph by name.
 
