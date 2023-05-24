@@ -7,7 +7,7 @@ Generates datamodel documentation from SHACL and/or RDFS files.
 ## Documentation
 
 For more information about the internals of this library: see the automatically generated [documentation](/docs/README.md)
-# Usage:
+## Usage:
 
 ```python
 sh_md = ShaclMarkdownGenerator(
@@ -42,3 +42,6 @@ sh_md.generate(organization="/datamodels/organizations/organizations.shacl.ttl",
                object="/datamodels/objects/objects.shacl.ttl",
                terms="/datamodels/terms/terms.shacl.ttl",)
 ```
+
+## Result example
+[developer.meemoo.be](developer.meemoo.be)
