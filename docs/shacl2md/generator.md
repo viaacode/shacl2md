@@ -12,14 +12,14 @@ Generator
     - [ShaclGraph().generate_puml](#shaclgraph()generate_puml)
     - [ShaclGraph().validate](#shaclgraph()validate)
   - [ShaclMarkdownGenerator](#shaclmarkdowngenerator)
+    - [ShaclMarkdownGenerator().filter_graph](#shaclmarkdowngenerator()filter_graph)
+    - [ShaclMarkdownGenerator().filter_language](#shaclmarkdowngenerator()filter_language)
     - [ShaclMarkdownGenerator().generate](#shaclmarkdowngenerator()generate)
     - [ShaclMarkdownGenerator().get_graph](#shaclmarkdowngenerator()get_graph)
-    - [ShaclMarkdownGenerator().get_other_graphs](#shaclmarkdowngenerator()get_other_graphs)
-    - [ShaclMarkdownGenerator().get_other_languages](#shaclmarkdowngenerator()get_other_languages)
 
 ## ShaclGraph
 
-[Show source in generator.py:160](../../shacl2md/generator.py#L160)
+[Show source in generator.py:163](../../shacl2md/generator.py#L163)
 
 #### Signature
 
@@ -35,7 +35,7 @@ class ShaclGraph:
 
 ### ShaclGraph().generate_md
 
-[Show source in generator.py:226](../../shacl2md/generator.py#L226)
+[Show source in generator.py:229](../../shacl2md/generator.py#L229)
 
 Generate markdown documentation from the SHACL graph.
 
@@ -48,7 +48,7 @@ def generate_md(self):
 
 ### ShaclGraph().generate_puml
 
-[Show source in generator.py:189](../../shacl2md/generator.py#L189)
+[Show source in generator.py:192](../../shacl2md/generator.py#L192)
 
 Generate a PlantUML diagram from the SHACL graph.
 
@@ -61,7 +61,7 @@ def generate_puml(self):
 
 ### ShaclGraph().validate
 
-[Show source in generator.py:302](../../shacl2md/generator.py#L302)
+[Show source in generator.py:305](../../shacl2md/generator.py#L305)
 
 Validate the SHACL graph against the SHACL specification.
 
@@ -92,14 +92,48 @@ class ShaclMarkdownGenerator:
         jekyll_parent_page: str = "index",
         jekyll_layout: str = "default",
         jekyll_nav_order: int = 1,
-        ontology_graphs: List[str] = [],
+        ontology_graphs: List[Union[str, Graph]] = [],
     ):
         ...
 ```
 
+### ShaclMarkdownGenerator().filter_graph
+
+[Show source in generator.py:101](../../shacl2md/generator.py#L101)
+
+Get all other graphs.
+
+#### Arguments
+
+- `graph_name` *str* - Name of the graph to filter.
+
+#### Signature
+
+```python
+def filter_graph(self, graph_name: str):
+    ...
+```
+
+### ShaclMarkdownGenerator().filter_language
+
+[Show source in generator.py:92](../../shacl2md/generator.py#L92)
+
+Get all other languages.
+
+#### Arguments
+
+- `lang` *str* - language to filter
+
+#### Signature
+
+```python
+def filter_language(self, lang: str):
+    ...
+```
+
 ### ShaclMarkdownGenerator().generate
 
-[Show source in generator.py:107](../../shacl2md/generator.py#L107)
+[Show source in generator.py:110](../../shacl2md/generator.py#L110)
 
 Generate markdown documentation from SHACL files.
 
@@ -140,51 +174,17 @@ def generate(self, **shacls) -> None:
 
 ### ShaclMarkdownGenerator().get_graph
 
-[Show source in generator.py:80](../../shacl2md/generator.py#L80)
+[Show source in generator.py:83](../../shacl2md/generator.py#L83)
 
 Get a graph by name.
 
 #### Arguments
 
-- `name` *str* - Name of the graph to get.
+- `graph_name` *str* - Name of the graph to get.
 
 #### Signature
 
 ```python
-def get_graph(self, name: str):
-    ...
-```
-
-### ShaclMarkdownGenerator().get_other_graphs
-
-[Show source in generator.py:98](../../shacl2md/generator.py#L98)
-
-Get all other graphs.
-
-#### Arguments
-
-- `name` *str* - Name of the graph to filter.
-
-#### Signature
-
-```python
-def get_other_graphs(self, name: str):
-    ...
-```
-
-### ShaclMarkdownGenerator().get_other_languages
-
-[Show source in generator.py:89](../../shacl2md/generator.py#L89)
-
-Get all other languages.
-
-#### Arguments
-
-- `lang` *str* - language to filter
-
-#### Signature
-
-```python
-def get_other_languages(self, lang: str):
+def get_graph(self, graph_name: str):
     ...
 ```
