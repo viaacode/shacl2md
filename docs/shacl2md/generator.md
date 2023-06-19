@@ -61,7 +61,7 @@ def generate_puml(self):
 
 ### ShaclGraph().validate
 
-[Show source in generator.py:298](../../shacl2md/generator.py#L298)
+[Show source in generator.py:300](../../shacl2md/generator.py#L300)
 
 Validate the SHACL graph against the SHACL specification.
 

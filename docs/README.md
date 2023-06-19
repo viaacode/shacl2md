@@ -5,6 +5,8 @@
 A full list of `Shacl2md` project modules.
 
 - [Shacl2md](shacl2md/index.md#shacl2md)
+    - [Cli](shacl2md/cli/index.md#cli)
+        - [Root](shacl2md/cli/root.md#root)
     - [Generator](shacl2md/generator.md#generator)
     - [Templates](shacl2md/templates/index.md#templates)
     - [Utilities](shacl2md/utilities/index.md#utilities)

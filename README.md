@@ -9,6 +9,7 @@ Generates datamodel documentation from SHACL and/or RDFS files.
 For more information about the internals of this library: see the automatically generated [documentation](/docs/README.md)
 ## Usage:
 
+### Python code
 ```python
 sh_md = ShaclMarkdownGenerator(
     languages=["nl", "en", "fr"],
@@ -42,6 +43,35 @@ sh_md.generate(organization="/datamodels/organizations/organizations.shacl.ttl",
                object="/datamodels/objects/objects.shacl.ttl",
                terms="/datamodels/terms/terms.shacl.ttl",)
 ```
+
+### CLI
+
+#### `shacl2md`
+
+**Usage**:
+
+```console
+$ shacl2md [OPTIONS] SHACL_FILES...
+```
+
+**Arguments**:
+
+* `SHACL_FILES...`: The path to SHACL files, with graph name to be processed, in the form of `graph_name:./path/to/shacl_file/ttl`  [required]
+
+**Options**:
+
+* `-l, --languages TEXT`: The languages to generate the documentation for  [required]
+* `-o, --output_dir TEXT`: The directory to output the documentation to  [default: ./docs]
+* `-of, --ontology_file TEXT`: The path to the ontology files
+* `-ssv, --shacl_shacl_validation`: Validate the SHACL files with SHACL
+* `-vd, --verion_directory`: Create a version directory for the documentation
+* `-cl, --crosslink`: Crosslink between graphs
+* `-jpp, --jekyll_parent_page TEXT`: The parent page for the Jekyll documentation  [default: index]
+* `-jl, --jekyll_layout TEXT`: The layout for the Jekyll documentation  [default: default]
+* `-jno, --jekyll_nav_order INTEGER`: The navigation order for the Jekyll documentation  [default: 1]
+* `--help`: Show this message and exit.
+
+
 
 ## Result example
 [developer.meemoo.be](https://developer.meemoo.be/)
