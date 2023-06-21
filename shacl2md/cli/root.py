@@ -26,37 +26,30 @@ def generate(
         help="The directory to output the documentation to",
     )] = "./docs",
     ontology_files : Annotated[List[str] , typer.Option(
-        "-of",
         "--ontology_file",
         help="The path to the ontology files",
     )] = [],
     shacl_shacl_validation : Annotated[bool, typer.Option(
-        "-ssv",
         "--shacl_shacl_validation",
         help="Validate the SHACL files with SHACL",
     )] = False,
-    verion_directory : Annotated[bool, typer.Option(
-        "-vd",
-        "--verion_directory",
+    version_directory : Annotated[bool, typer.Option(
+        "--version_directory",
         help="Create a version directory for the documentation",
     )] = False,
     crosslink : Annotated[bool, typer.Option(
-        "-cl",
         "--crosslink",
         help="Crosslink between graphs",
     )] = False,
     jekyll_parent_page : Annotated[Optional[str], typer.Option(
-        "-jpp",
         "--jekyll_parent_page",
         help="The parent page for the Jekyll documentation",
     )] = "index",
     jekyll_layout : Annotated[Optional[str], typer.Option(
-        "-jl",
         "--jekyll_layout",
         help="The layout for the Jekyll documentation",
     )] = "default",
     jekyll_nav_order : Annotated[Optional[int], typer.Option(
-        "-jno",
         "--jekyll_nav_order",
         help="The navigation order for the Jekyll documentation",
     )] = 1,
@@ -78,7 +71,7 @@ def generate(
         languages=languages,
         output_dir=output_dir,
         shacl_shacl_validation=shacl_shacl_validation,
-        version_directory=verion_directory,
+        version_directory=version_directory,
         crosslink_between_graphs=crosslink,
         jekyll_parent_page=jekyll_parent_page,
         jekyll_layout=jekyll_layout,
