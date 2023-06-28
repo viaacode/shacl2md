@@ -325,11 +325,11 @@ class ShaclGraph:
             i = 2
             for prop in rdf_class.properties:
                 if prop.description:
-                    snippet_prop = f"\t{prop.shortname} ${{{i}:{prop.description}}} ;"
+                    snippet_prop = f"\t{prop.shortname} ${{{i}:{prop.description} ({', '.join([p_dt.shortname for p_dt in prop.datatypes])})}} ;"
                 elif prop.label:
-                    snippet_prop = f"\t{prop.shortname} ${{{i}:{prop.label}}} ;"
+                    snippet_prop = f"\t{prop.shortname} ${{{i}:{prop.label} ({', '.join([p_dt.shortname for p_dt in prop.datatypes])})}} ;"
                 else:
-                    snippet_prop = f"\t{prop.shortname} ${i};"
+                    snippet_prop = f"\t{prop.shortname} ${{{i}:({', '.join([p_dt.shortname for p_dt in prop.datatypes])})}} ;"
                 snippet_json[f"({self.name}){rdf_class.shortname}"]["body"].append(snippet_prop)
                 i += 1
             if snippet_json[f"({self.name}){rdf_class.shortname}"]["body"]:
