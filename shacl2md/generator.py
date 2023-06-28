@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 from itertools import groupby
 from typing import List, Union
@@ -17,7 +18,61 @@ from shacl2md.utilities.rdf import RDFClass, to_shortname
 
 SHACL = Namespace("http://www.w3.org/ns/shacl#")
 
-class ShaclMarkdownGenerator: 
+
+class Generator:
+    def __init__(
+        self,
+        languages : List[str], 
+        output_dir : str = "./",
+        shacl_shacl_validation : bool = False,
+
+    ):
+        self.output_dir : str = output_dir
+        self.shacl_shacl_validation : bool = shacl_shacl_validation
+        self.graphs :  dict = {}
+        self.ontology_graph : Graph = Graph()
+        self.languages = languages
+
+    def get_graph(self, graph_name: str):
+        """
+        Get a graph by name.
+
+        Args:
+            **shacls: Dictionary of SHACL files or Graphs to generate documentation for. The key is the name of the SHACL graph, the value is the filename of the SHACL file.
+        """
+        return self.graphs[graph_name]
+
+    def add_shacl_graphs(self, **shacls):
+        """
+        Add SHACL graphs.
+
+        Args:
+            shacls (List[Graph]): List of SHACL graphs to add.
+        """
+        shacl_graphs : List[ShaclGraph] = []
+        # parse shacl files to graphs
+        for shacl, shacl_filename_or_graph in shacls.items():
+            g = Graph(identifier=shacl, bind_namespaces="none")
+            if isinstance(shacl_filename_or_graph, str):
+                g.parse(shacl_filename_or_graph)
+            elif isinstance(shacl_filename_or_graph, Graph):
+                g += shacl_filename_or_graph
+            self.graphs[shacl] = g
+
+        for shacl in self.graphs.keys():
+            for lang in self.languages:
+                shacl_graph = ShaclGraph(
+                    shacl,
+                    lang,
+                    self
+                )
+                shacl_graphs.append(shacl_graph)
+            if self.shacl_shacl_validation:
+                shacl_graph.validate()
+
+        return shacl_graphs
+
+class ShaclMarkdownGenerator(Generator): 
 
     def __init__(
         self,
@@ -45,17 +100,14 @@ class ShaclMarkdownGenerator:
             jekyll_nav_order (int, optional): Jekyll nav order. Defaults to 1.
             ontology_graphs (List[str | Graph], optional): List of ontology files or Graphs, to include with the SHACL shapes, e.g., class definitions or reasoning. Defaults to [].
         """
-
+        super().__init__(output_dir, shacl_shacl_validation)
         self.languages : List[str] = languages
-        self.output_dir : str = output_dir
-        self.shacl_shacl_validation : bool = shacl_shacl_validation
         self.version_directory : bool = version_directory
         self.crosslink_between_graphs : bool = crosslink_between_graphs
         self.jekyll_parent_page : str = jekyll_parent_page
         self.jekyll_layout : str = jekyll_layout
         self.jekyll_nav_order : int = jekyll_nav_order            
 
-        self.graphs :  dict = {}
         self.ontology_graph : Graph = Graph(identifier="ontology_graph", bind_namespaces="none")
         for ontology_graph in ontology_graphs:
             if isinstance(ontology_graph, str):
@@ -69,15 +121,6 @@ class ShaclMarkdownGenerator:
                     )
         self.template = self.env.get_template("template.md.jinja")
         self.puml_template = self.env.get_template("diagram.puml.jinja")
-
-    def get_graph(self, graph_name: str):
-        """
-        Get a graph by name.
-
-        Args:
-            graph_name (str): Name of the graph to get.
-        """
-        return self.graphs[graph_name]
 
     def filter_language(self, lang: str):
         """
@@ -126,40 +169,51 @@ class ShaclMarkdownGenerator:
             ...     description="/path_to_shacl/description.shacl.ttl",
             ... )
         """
-
-
-        shacl_graphs : List[ShaclGraph] = []
-        # parse shacl files to graphs
-        for shacl, shacl_filename_or_graph in shacls.items():
-            g = Graph(identifier=shacl, bind_namespaces="none")
-            if isinstance(shacl_filename_or_graph, str):
-                g.parse(shacl_filename_or_graph)
-            elif isinstance(shacl_filename_or_graph, Graph):
-                g += shacl_filename_or_graph
-            self.graphs[shacl] = g
-
-        for shacl in self.graphs.keys():
-            for lang in self.languages:
-                shacl_graph = ShaclGraph(
-                    shacl,
-                    lang,
-                    self
-                )
-                shacl_graphs.append(shacl_graph)
-            if self.shacl_shacl_validation:
-                shacl_graph.validate()
+        shacl_graphs : List[ShaclGraph] = self.add_shacl_graphs(**shacls)
         
         for shacl_graph in shacl_graphs:
             shacl_graph.generate_md()
 
-                
+class ShaclSnippetGenerator(Generator):
+    def __init__(
+        self,
+        languages : List[str] = ["en"],
+        output_dir : str= "./", 
+        shacl_shacl_validation : bool = False,
+        ):
+        super().__init__(languages, output_dir, shacl_shacl_validation)
+
+    def generate(
+        self,
+        **shacls):
+        """
+        Generate snippets from SHACL files. Place the snippets in the `.vscode` directory.
+
+        Args:
+            **shacls: Dictionary of SHACL files or Graphs to generate snippets for. The key is the name of the SHACL graph, the value is the filename of the SHACL file.
+
+        Raises:
+            ValidationFailure (pyshacl.errors.ValidationFailure): Raised when the SHACL files do not validate against the SHACL specification.
+
+        Examples:
+            >>> from shacl2md import ShaclSnippetGenerator
+            >>> sh_snippet = ShaclSnippetGenerator()
+            >>> sh_snippet.generate(
+            ...     organizations="/path_to_shacl/organizations.shacl.ttl",
+            ...     description="/path_to_shacl/description.shacl.ttl",
+            ... )
+        """
+        shacl_graphs : List[ShaclGraph] = self.add_shacl_graphs(**shacls)
+        for shacl_graph in shacl_graphs:
+            shacl_graph.generate_vscode_snippet()
+
 class ShaclGraph:
 
     def __init__(
         self,
         name: str,
         lang : str,
-        generator : ShaclMarkdownGenerator,
+        generator : Union[ShaclMarkdownGenerator, ShaclSnippetGenerator],
     ):
         """
         A shacl graph object.
@@ -246,7 +300,7 @@ class ShaclGraph:
                 rdf_filename=rdf_filename,
                 doc=self.doc,
                 namespaces=self.namespaces,
-                classes=self.classes,
+                classes=[c.to_dict() for c in self.classes],
                 diagramText=svg_text,
                 languages=other_languages,
                 output_dir_length=self.output_dir_length,
@@ -256,40 +310,76 @@ class ShaclGraph:
         )
         print(f"* File '{self.output_dir}/index.md' created")
 
+    def generate_vscode_snippet(self):
+        """
+        Generate Snippets for triples in VSCODE
+        """
+        snippet_json = {}
+        for rdf_class in self.classes:
+            snippet_json[f"({self.name}){rdf_class.shortname}"] = {
+                "prefix": rdf_class.shortname,
+                "body": [],
+                "description": rdf_class.label,
+            }
+            snippet_json[f"({self.name}){rdf_class.shortname}"]["body"].append(f"${{1:URI}} a {rdf_class.shortname} ;")
+            i = 2
+            for prop in rdf_class.properties:
+                if prop.description:
+                    snippet_prop = f"\t{prop.shortname} ${{{i}:{prop.description}}} ;"
+                elif prop.label:
+                    snippet_prop = f"\t{prop.shortname} ${{{i}:{prop.label}}} ;"
+                else:
+                    snippet_prop = f"\t{prop.shortname} ${i};"
+                snippet_json[f"({self.name}){rdf_class.shortname}"]["body"].append(snippet_prop)
+                i += 1
+            if snippet_json[f"({self.name}){rdf_class.shortname}"]["body"]:
+                snippet_json[f"({self.name}){rdf_class.shortname}"]["body"][-1] = snippet_json[f"({self.name}){rdf_class.shortname}"]["body"][-1][:-1] + "."
+        with open(f"{self.output_dir}{self.name}.code-snippets", "w", encoding ='utf8') as json_file:
+            json.dump(snippet_json, json_file)
+            print(f"Generated snippet for {self.name}")
+            
+
     def _get_classes(self):
         crosslink_graphs = []
-        if self.generator.crosslink_between_graphs:
-            crosslink_graphs = self.generator.filter_graph(self.name)
+        try:
+            if self.generator.crosslink_between_graphs:
+                crosslink_graphs = self.generator.filter_graph(self.name)
+        except AttributeError:
+            pass
         for c in self.graph.query(GET_CLASSES, initBindings={"lang": Literal(self.lang)}):
             c = RDFClass(self.lang, c.iri, to_shortname(self.graph, c.iri), c.label, c.description)
             c.check_crosslink(self.graph, crosslink_graphs)
             c.get_properties(self.graph, crosslink_graphs)
             c.get_subclasses(self.graph)
             c.get_superclasses(self.graph)
-            yield c.to_dict()
+            yield c
 
     def _generate_output_dir(self):
         base_output_dir = self.generator.output_dir
-        version_directory = self.generator.version_directory
         output_dir_length = 1
-        if version_directory:
-            if self.doc is None or self.doc.version is None:
-                print("* Version info not found; outputting in main directory.")
-                output_dir = base_output_dir
-            else:
-                output_dir = f"{base_output_dir}/{self.doc.version}"
+        try:
+            version_directory = self.generator.version_directory
+            if version_directory:
+                if self.doc is None or self.doc.version is None:
+                    print("* Version info not found; outputting in main directory.")
+                    output_dir = base_output_dir
+                else:
+                    output_dir = f"{base_output_dir}/{self.doc.version}"
 
-            if not os.path.exists(base_output_dir):
-                os.mkdir(base_output_dir)
-            print(f"* Directory '{base_output_dir}' created")
-            output_dir_length += 1
-        else:
+                if not os.path.exists(base_output_dir):
+                    os.mkdir(base_output_dir)
+                print(f"* Directory '{base_output_dir}' created")
+                output_dir_length += 1
+            else:
+                output_dir = base_output_dir
+            output_dir = f"{output_dir}/{self.graph.identifier}/{self.lang}"
+
+        except AttributeError:
             output_dir = base_output_dir
 
-        output_dir = f"{output_dir}/{self.graph.identifier}/{self.lang}"
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
-        print(f"* Directory '{output_dir}' created")
+            print(f"* Directory '{output_dir}' created")
         return output_dir, output_dir_length
 
     def _get_doc(self):
