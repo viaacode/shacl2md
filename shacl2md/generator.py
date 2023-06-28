@@ -255,7 +255,7 @@ class ShaclGraph:
         print(
             self.generator.puml_template.render(
                 namespaces=self.namespaces,
-                classes=self.classes,
+                classes=[c.to_dict() for c in self.classes],
                 output_dir_length=self.output_dir_length,
             ),
             file=open(f"{self.output_dir}/{puml_filename}", "w"),
