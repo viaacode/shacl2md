@@ -283,6 +283,8 @@ class ShaclGraph:
                 os.mkdir(base_output_dir)
             print(f"* Directory '{base_output_dir}' created")
             output_dir_length += 1
+        else:
+            output_dir = base_output_dir
 
         output_dir = f"{output_dir}/{self.graph.identifier}/{self.lang}"
         if not os.path.exists(output_dir):

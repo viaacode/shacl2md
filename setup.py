@@ -28,5 +28,8 @@ setup(
     python_requires=">=3.7",
     install_requires=install_requires,
     include_package_data=True,
+    entry_points={
+        "console_scripts": ["shacl2md=shacl2md.cli:app"],
+    },
 )
 
