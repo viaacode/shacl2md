@@ -25,20 +25,34 @@ class Generator:
         languages : List[str], 
         output_dir : str = "./",
         shacl_shacl_validation : bool = False,
-
+        ontology_graphs : List[Union[str, Graph]] = [],
     ):
         self.output_dir : str = output_dir
         self.shacl_shacl_validation : bool = shacl_shacl_validation
         self.graphs :  dict = {}
-        self.ontology_graph : Graph = Graph()
-        self.languages = languages
+        self.ontology_graph : Graph = Graph(identifier="ontology_graph", bind_namespaces="none")
+        for ontology_graph in ontology_graphs:
+            self.add_ontology_graph(ontology_graph)
+        self.languages : List[str] = languages
+
+    def add_ontology_graph(self, ontology_graph : Union[str, Graph]):
+        """
+        Add an ontology graph.
+
+        Args:
+            ontology_graph (str | Graph): Ontology graph to add.
+        """
+        if isinstance(ontology_graph, str):
+            self.ontology_graph.parse(ontology_graph)
+        elif isinstance(ontology_graph, Graph):
+            self.ontology_graph += ontology_graph
 
     def get_graph(self, graph_name: str):
         """
         Get a graph by name.
 
         Args:
-            **shacls: Dictionary of SHACL files or Graphs to generate documentation for. The key is the name of the SHACL graph, the value is the filename of the SHACL file.
+            graph_name (str): Name of the graph to get.
         """
         return self.graphs[graph_name]
 
@@ -47,7 +61,7 @@ class Generator:
         Add SHACL graphs.
 
         Args:
-            shacls (List[Graph]): List of SHACL graphs to add.
+            **shacls: Dictionary of SHACL files or Graphs to generate documentation for. The key is the name of the SHACL graph, the value is the filename of the SHACL file.
         """
         shacl_graphs : List[ShaclGraph] = []
         # parse shacl files to graphs
@@ -100,20 +114,13 @@ class ShaclMarkdownGenerator(Generator):
             jekyll_nav_order (int, optional): Jekyll nav order. Defaults to 1.
             ontology_graphs (List[str | Graph], optional): List of ontology files or Graphs, to include with the SHACL shapes, e.g., class definitions or reasoning. Defaults to [].
         """
-        super().__init__(output_dir, shacl_shacl_validation)
-        self.languages : List[str] = languages
+        super().__init__(languages, output_dir, shacl_shacl_validation, ontology_graphs)
         self.version_directory : bool = version_directory
         self.crosslink_between_graphs : bool = crosslink_between_graphs
         self.jekyll_parent_page : str = jekyll_parent_page
         self.jekyll_layout : str = jekyll_layout
-        self.jekyll_nav_order : int = jekyll_nav_order            
+        self.jekyll_nav_order : int = jekyll_nav_order
 
-        self.ontology_graph : Graph = Graph(identifier="ontology_graph", bind_namespaces="none")
-        for ontology_graph in ontology_graphs:
-            if isinstance(ontology_graph, str):
-                self.ontology_graph.parse(ontology_graph)
-            elif isinstance(ontology_graph, Graph):
-                self.ontology_graph += ontology_graph
         self.env = Environment(
                         loader=PackageLoader("shacl2md"),
                         autoescape=select_autoescape(),
@@ -180,8 +187,9 @@ class ShaclSnippetGenerator(Generator):
         languages : List[str] = ["en"],
         output_dir : str= "./", 
         shacl_shacl_validation : bool = False,
+        ontology_graphs : List[Union[str, Graph]] = [],
         ):
-        super().__init__(languages, output_dir, shacl_shacl_validation)
+        super().__init__(languages, output_dir, shacl_shacl_validation, ontology_graphs)
 
     def generate(
         self,
@@ -316,6 +324,8 @@ class ShaclGraph:
         """
         snippet_json = {}
         for rdf_class in self.classes:
+            if not rdf_class.properties:
+                continue
             snippet_json[f"({self.name}){rdf_class.shortname}"] = {
                 "prefix": rdf_class.shortname,
                 "body": [],
@@ -338,7 +348,6 @@ class ShaclGraph:
             json.dump(snippet_json, json_file)
             print(f"Generated snippet for {self.name}")
             
-
     def _get_classes(self):
         crosslink_graphs = []
         try:
