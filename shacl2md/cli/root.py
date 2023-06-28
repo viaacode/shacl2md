@@ -13,7 +13,7 @@ app = typer.Typer(add_completion=False)
 )
 def generate(
     shacl_files : Annotated[List[str], typer.Argument(
-        help="The path to SHACL files, with graph name to be processed, in the form of `graph_name:./path/to/shacl_file/ttl`",
+        help="The path to SHACL files, with graph name to be processed, in the form of `model_name:./path/to/shacl_file/ttl`",
     )],
     languages : Annotated[List[str], typer.Option(
         "-l",
