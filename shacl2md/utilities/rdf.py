@@ -128,15 +128,15 @@ class RDFClass:
                         self.crosslink = graph.identifier
                     self.get_class_info(graph)
 
-    # deep copy method
-    def copy(self):
-        copy_class = RDFClass(
-            self.lang, self.iri, self.shortname, self.label, self.description
-        )
-        copy_class.properties = [prop.copy() for prop in self.properties]
-        copy_class.subclasses = [sub.copy() for sub in self.subclasses]
-        copy_class.superclasses = [sup.copy() for sup in self.superclasses]
-        return copy_class
+    # # deep copy method
+    # def copy(self):
+    #     copy_class = RDFClass(
+    #         self.lang, self.iri, self.shortname, self.label, self.description
+    #     )
+    #     copy_class.properties = [prop.copy() for prop in self.properties]
+    #     copy_class.subclasses = [sub.copy() for sub in self.subclasses]
+    #     copy_class.superclasses = [sup.copy() for sup in self.superclasses]
+    #     return copy_class
 
     def to_dict(self) -> dict:
         return json.loads(json.dumps(self, default=lambda o: o.__dict__))
@@ -194,17 +194,17 @@ class RDFProperty:
 
         self.value_list = list(get_values_generator())
 
-    def copy(self):
-        copy_prop = RDFProperty(
-            self.iri,
-            self.shortname,
-            self.label,
-            self.description,
-            self.min,
-            self.max,
-        )
-        copy_prop.datatypes = [dt.copy() for dt in self.datatypes]
-        copy_prop.value_list = [value.copy() for value in self.value_list]
+    # def copy(self):
+    #     copy_prop = RDFProperty(
+    #         self.iri,
+    #         self.shortname,
+    #         self.label,
+    #         self.description,
+    #         self.min,
+    #         self.max,
+    #     )
+    #     copy_prop.datatypes = [dt.copy() for dt in self.datatypes]
+    #     copy_prop.value_list = [value.copy() for value in self.value_list]
 
     def to_dict(self):
         return json.loads(json.dumps(self, default=lambda o: o.__dict__))
@@ -241,9 +241,9 @@ class RDFValue:
         self.shortname = shortname
         self.label = label
 
-    def copy(self):
-        copy_value = RDFValue(self.iri, self.shortname, self.label)
-        return copy_value
+    # def copy(self):
+    #     copy_value = RDFValue(self.iri, self.shortname, self.label)
+    #     return copy_value
 
     def to_dict(self):
         return json.loads(json.dumps(self, default=lambda o: o.__dict__))
