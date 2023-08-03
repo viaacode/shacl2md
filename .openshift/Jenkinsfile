@@ -40,7 +40,7 @@ pipeline {
                     withCredentials([string(credentialsId: 'nexus_username', variable: 'NEXUS_USERNAME'), string(credentialsId: 'nexus_password', variable: 'NEXUS_PASSWORD')]) {
                         docker.image("${BASE_IMG_NAME}:3.8-slim-buster").inside("") {
                             sh """#!/bin/bash
-                            pip3 install -r requirements.txt --extra-index-url http://do-prd-mvn-01.do.viaa.be:8081/repository/pypi-all/simple --trusted-host do-prd-mvn-01.do.viaa.be
+                            pip3 install -r requirements-deploy.txt --extra-index-url http://do-prd-mvn-01.do.viaa.be:8081/repository/pypi-all/simple --trusted-host do-prd-mvn-01.do.viaa.be
                             unset HTTPS_PROXY HTTP_PROXY http_proxy https_proxy
                             python setup.py sdist bdist_wheel --new-version $BUILD_CONFIG_NAME
                             twine upload dist/* --repository-url http://do-prd-mvn-01.do.viaa.be:8081/repository/pypi-internal/ -u $NEXUS_USERNAME -p $NEXUS_PASSWORD --non-interactive
