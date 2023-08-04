@@ -149,11 +149,13 @@ class ShaclMarkdownGenerator(Generator):
 
     def generate(
         self, 
+        exclude: list,
         **shacls) -> None:
         """
         Generate markdown documentation from SHACL files.
 
         Args:
+            exclude: list of graph names for which docs should not be generated
             **shacls: Dictionary of SHACL files or Graphs to generate documentation for. The key is the name of the SHACL graph, the value is the filename of the SHACL file.
 
         Raises:
@@ -179,6 +181,8 @@ class ShaclMarkdownGenerator(Generator):
         shacl_graphs : List[ShaclGraph] = self.add_shacl_graphs(**shacls)
         
         for shacl_graph in shacl_graphs:
+            if shacl_graph.name in exclude:
+                continue
             shacl_graph.generate_md()
 
 class ShaclSnippetGenerator(Generator):
