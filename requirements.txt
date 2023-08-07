@@ -8,3 +8,4 @@ plantuml==0.3.0
 pyshacl==0.20.0
 typer==0.9.0
 rich==13.4.2
+lxml==4.9.1
