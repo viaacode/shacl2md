@@ -71,7 +71,6 @@ pipeline {
             jiraSendBuildInfo site: "${JIRA_URL}"
             // Archive test results
             script {
-                sh "docker image prune -af"
                 if (fileExists('./tests/test_results.xml')) {
                     junit 'tests/test_results.xml'
                 } else {
