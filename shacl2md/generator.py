@@ -48,6 +48,8 @@ class Generator:
             self.ontology_graph.parse(ontology_graph)
         elif isinstance(ontology_graph, Graph):
             self.ontology_graph += ontology_graph
+            for name, uri in ontology_graph.namespaces():
+                self.ontology_graph.bind(name, uri)
 
     def get_graph(self, graph_name: str):
         """
@@ -73,6 +75,8 @@ class Generator:
                 g.parse(shacl_filename_or_graph)
             elif isinstance(shacl_filename_or_graph, Graph):
                 g += shacl_filename_or_graph
+                for name, uri in shacl_filename_or_graph.namespaces():
+                    g.bind(name, uri)
             self.graphs[shacl] = g
 
         for shacl in self.graphs.keys():
