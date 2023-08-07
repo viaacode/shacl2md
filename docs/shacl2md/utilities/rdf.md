@@ -10,7 +10,6 @@ Rdf
 - [Rdf](#rdf)
   - [RDFClass](#rdfclass)
     - [RDFClass().check_crosslink](#rdfclass()check_crosslink)
-    - [RDFClass().copy](#rdfclass()copy)
     - [RDFClass().get_class_info](#rdfclass()get_class_info)
     - [RDFClass().get_properties](#rdfclass()get_properties)
     - [RDFClass().get_subclasses](#rdfclass()get_subclasses)
@@ -20,12 +19,10 @@ Rdf
     - [RDFDatatype().copy](#rdfdatatype()copy)
     - [RDFDatatype().to_dict](#rdfdatatype()to_dict)
   - [RDFProperty](#rdfproperty)
-    - [RDFProperty().copy](#rdfproperty()copy)
     - [RDFProperty().get_datatypes](#rdfproperty()get_datatypes)
     - [RDFProperty().get_values](#rdfproperty()get_values)
     - [RDFProperty().to_dict](#rdfproperty()to_dict)
   - [RDFValue](#rdfvalue)
-    - [RDFValue().copy](#rdfvalue()copy)
     - [RDFValue().to_dict](#rdfvalue()to_dict)
   - [to_shortname](#to_shortname)
 
@@ -49,17 +46,6 @@ class RDFClass:
 
 ```python
 def check_crosslink(self, g: Graph, g_crosslinks: List[Graph] = []):
-    ...
-```
-
-### RDFClass().copy
-
-[Show source in rdf.py:132](../../../shacl2md/utilities/rdf.py#L132)
-
-#### Signature
-
-```python
-def copy(self):
     ...
 ```
 
@@ -168,17 +154,6 @@ class RDFProperty:
         ...
 ```
 
-### RDFProperty().copy
-
-[Show source in rdf.py:197](../../../shacl2md/utilities/rdf.py#L197)
-
-#### Signature
-
-```python
-def copy(self):
-    ...
-```
-
 ### RDFProperty().get_datatypes
 
 [Show source in rdf.py:166](../../../shacl2md/utilities/rdf.py#L166)
@@ -224,17 +199,6 @@ def to_dict(self):
 class RDFValue:
     def __init__(self, iri, shortname, label):
         ...
-```
-
-### RDFValue().copy
-
-[Show source in rdf.py:244](../../../shacl2md/utilities/rdf.py#L244)
-
-#### Signature
-
-```python
-def copy(self):
-    ...
 ```
 
 ### RDFValue().to_dict
