@@ -25,12 +25,14 @@ class Generator:
         languages : List[str], 
         output_dir : str = "./",
         shacl_shacl_validation : bool = False,
-        ontology_graphs : List[Union[str, Graph]] = [],
+        ontology_graphs : List[Union[str, Graph]] = None,
     ):
         self.output_dir : str = output_dir
         self.shacl_shacl_validation : bool = shacl_shacl_validation
         self.graphs :  dict = {}
         self.ontology_graph : Graph = Graph(identifier="ontology_graph", bind_namespaces="none")
+        if ontology_graphs is None:
+            ontology_graphs = []
         for ontology_graph in ontology_graphs:
             self.add_ontology_graph(ontology_graph)
         self.languages : List[str] = languages
@@ -98,7 +100,7 @@ class ShaclMarkdownGenerator(Generator):
         jekyll_parent_page : str = "index",
         jekyll_layout : str = "default",
         jekyll_nav_order : int = 1,
-        ontology_graphs : List[Union[str, Graph]] = [],
+        ontology_graphs : List[Union[str, Graph]] = None,
         ):
         """
         A shacl markdown generator object.
@@ -128,6 +130,7 @@ class ShaclMarkdownGenerator(Generator):
                     )
         self.template = self.env.get_template("template.md.jinja")
         self.puml_template = self.env.get_template("diagram.puml.jinja")
+        
 
     def filter_language(self, lang: str):
         """
@@ -193,7 +196,7 @@ class ShaclSnippetGenerator(Generator):
         languages : List[str] = ["en"],
         output_dir : str= "./", 
         shacl_shacl_validation : bool = False,
-        ontology_graphs : List[Union[str, Graph]] = [],
+        ontology_graphs : List[Union[str, Graph]] = None,
         ):
         super().__init__(languages, output_dir, shacl_shacl_validation, ontology_graphs)
 
