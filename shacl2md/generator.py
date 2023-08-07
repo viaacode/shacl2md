@@ -149,7 +149,7 @@ class ShaclMarkdownGenerator(Generator):
 
     def generate(
         self, 
-        exclude: list,
+        exclude: list = None,
         **shacls) -> None:
         """
         Generate markdown documentation from SHACL files.
@@ -178,6 +178,8 @@ class ShaclMarkdownGenerator(Generator):
             ...     description="/path_to_shacl/description.shacl.ttl",
             ... )
         """
+        if exclude is None:
+            exclude = []
         shacl_graphs : List[ShaclGraph] = self.add_shacl_graphs(**shacls)
         
         for shacl_graph in shacl_graphs:
