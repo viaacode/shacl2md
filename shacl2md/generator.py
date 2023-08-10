@@ -284,7 +284,7 @@ class ShaclGraph:
         svg_filename = f"{self.name}-diagram.svg"
 
         # Generate PUML diagram
-        self.generator.logger.info(
+        print(
             self.generator.puml_template.render(
                 namespaces=self.namespaces,
                 classes=[c.to_dict() for c in self.classes],
@@ -330,7 +330,7 @@ class ShaclGraph:
         # Get markdown labels
         labels = get_lang_labels(self.lang)
 
-        self.generator.logger.info(
+        print(
             self.generator.template.render(
                 frontmatter={
                     "layout": self.generator.jekyll_layout,
