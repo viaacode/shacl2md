@@ -126,6 +126,7 @@ class ShaclMarkdownGenerator(Generator):
             jekyll_layout (str, optional): Jekyll layout. Defaults to "default".
             jekyll_nav_order (int, optional): Jekyll nav order. Defaults to 1.
             ontology_graphs (List[str | Graph], optional): List of ontology files or Graphs, to include with the SHACL shapes, e.g., class definitions or reasoning. Defaults to [].
+            logger (Logger, optional): logging.Logger. Defaults to None.
         """
         super().__init__(languages, output_dir, shacl_shacl_validation, ontology_graphs, logger)
         self.version_directory : bool = version_directory
@@ -192,12 +193,12 @@ class ShaclMarkdownGenerator(Generator):
             ...     description="/path_to_shacl/description.shacl.ttl",
             ... )
         """
-        if exclude is None:
+        if not exclude:
             exclude = []
         shacl_graphs : List[ShaclGraph] = self.add_shacl_graphs(**shacls)
         
         for shacl_graph in shacl_graphs:
-            if shacl_graph.name in exclude:
+            if shacl_graph.name in exclude or shacl_graph.name == "exclude":
                 continue
             shacl_graph.generate_md()
 
@@ -210,6 +211,16 @@ class ShaclSnippetGenerator(Generator):
         ontology_graphs : List[Union[str, Graph]] = None,
         logger : Logger = None,
         ):
+        """
+        A shacl snippet generator object.
+        
+        Args:
+            languages (List[str], optional): List of languages to generate snippets for. Defaults to ["en"].
+            output_dir (str, optional): Output directory. Defaults to "./".
+            shacl_shacl_validation (bool, optional): Validate the SHACL files against the SHACL specification. Defaults to False.
+            ontology_graphs (List[str | Graph], optional): List of ontology files or Graphs, to include with the SHACL shapes, e.g., class definitions or reasoning. Defaults to [].
+            logger (Logger, optional): logging.Logger. Defaults to None.
+        """
         super().__init__(languages, output_dir, shacl_shacl_validation, ontology_graphs, logger)
 
     def generate(
