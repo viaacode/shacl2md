@@ -1,4 +1,5 @@
 import argparse
+import subprocess
 import json
 import os
 from itertools import groupby
@@ -7,7 +8,7 @@ from typing import List, Union
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 from lxml import etree
-from plantumlcli import LocalPlantuml, RemotePlantuml
+from plantumlcli import LocalPlantuml
 from pyshacl import validate
 from rdflib.graph import Graph, URIRef
 from rdflib.namespace import Namespace
@@ -296,22 +297,29 @@ class ShaclGraph:
 
         # Render PUML diagram
         try:
-            local = LocalPlantuml.autoload(plantuml='./plantuml.jar')
-            local.dump(f"{self.output_dir}/{svg_filename}", 'svg',code)
-            self.generator.logger.info(f"* File '{self.output_dir}/{svg_filename}' created")
+            jar_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'plantuml.jar')
+            svg = subprocess.check_output([
+                "cat",
+                f"{self.output_dir}/{puml_filename}",
+                "|",
+                "java",
+                "-jar",
+                jar_path,
+                "-svg",
+                "-pipe"
+                ])
+
+            # Extract PUML SVG string
+            parser = etree.XMLParser(ns_clean=True, remove_comments=True)
+            tree = etree.fromstring(svg, parser)
+            tree.getroot().attrib.pop("width")
+            tree.getroot().attrib.pop("height")
+            tree.getroot().attrib.pop("style")
+            svg_text = etree.tostring(tree.getroot(), encoding="unicode", xml_declaration=False)
+            return svg_text
         except Exception as e:
             self.generator.logger.error(f"* File '{self.output_dir}/{svg_filename}' not created due to PlantUML error: {e}")
             raise e
-
-
-        # Extract PUML SVG string
-        parser = etree.XMLParser(ns_clean=True, remove_comments=True)
-        tree = etree.parse(f"{self.output_dir}/{svg_filename}", parser)
-        tree.getroot().attrib.pop("width")
-        tree.getroot().attrib.pop("height")
-        tree.getroot().attrib.pop("style")
-        svg_text = etree.tostring(tree.getroot(), encoding="unicode", xml_declaration=False)
-        return svg_text
 
     def generate_md(self):
         """
