@@ -7,7 +7,7 @@ from typing import List, Union
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 from lxml import etree
-from plantuml import PlantUML
+from plantumlcli import LocalPlantuml, RemotePlantuml
 from pyshacl import validate
 from rdflib.graph import Graph, URIRef
 from rdflib.namespace import Namespace
@@ -284,22 +284,20 @@ class ShaclGraph:
         svg_filename = f"{self.name}-diagram.svg"
 
         # Generate PUML diagram
-        print(
-            self.generator.puml_template.render(
+        code = self.generator.puml_template.render(
                 namespaces=self.namespaces,
                 classes=[c.to_dict() for c in self.classes],
                 output_dir_length=self.output_dir_length,
-            ),
+            )
+        print(code,
             file=open(f"{self.output_dir}/{puml_filename}", "w"),
         )
         self.generator.logger.info(f"* File '{self.output_dir}/{puml_filename}' created")
 
         # Render PUML diagram
-        pl = PlantUML("http://www.plantuml.com/plantuml/svg/")
         try:
-            pl.processes_file(
-                f"{self.output_dir}/{puml_filename}", directory=self.output_dir, outfile=svg_filename
-            )
+            local = LocalPlantuml.autoload(plantuml='./plantuml.jar')
+            local.dump(f"{self.output_dir}/{svg_filename}", 'svg',code)
             self.generator.logger.info(f"* File '{self.output_dir}/{svg_filename}' created")
         except Exception as e:
             self.generator.logger.error(f"* File '{self.output_dir}/{svg_filename}' not created due to PlantUML error: {e}")
