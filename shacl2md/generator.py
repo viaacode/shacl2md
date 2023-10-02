@@ -2,13 +2,13 @@ import argparse
 import subprocess
 import json
 import os
+from os.path import abspath
 from itertools import groupby
 from logging import Logger, getLogger
 from typing import List, Union
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 from lxml import etree
-from plantumlcli import LocalPlantuml
 from pyshacl import validate
 from rdflib.graph import Graph, URIRef
 from rdflib.namespace import Namespace
@@ -298,20 +298,22 @@ class ShaclGraph:
         # Render PUML diagram
         try:
             jar_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'plantuml.jar')
-            svg = subprocess.check_output([
-                "cat",
-                f"{self.output_dir}/{puml_filename}",
-                "|",
+            retcode = subprocess.call([
                 "java",
                 "-jar",
                 jar_path,
+                f"{self.output_dir}/{puml_filename}",
                 "-svg",
-                "-pipe"
-                ])
+                "-o",
+                abspath(self.output_dir)
+                ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            
+            if retcode > 0:
+                raise
 
             # Extract PUML SVG string
             parser = etree.XMLParser(ns_clean=True, remove_comments=True)
-            tree = etree.fromstring(svg, parser)
+            tree = etree.parse(f"{self.output_dir}/{svg_filename}", parser)
             tree.getroot().attrib.pop("width")
             tree.getroot().attrib.pop("height")
             tree.getroot().attrib.pop("style")
@@ -319,7 +321,7 @@ class ShaclGraph:
             return svg_text
         except Exception as e:
             self.generator.logger.error(f"* File '{self.output_dir}/{svg_filename}' not created due to PlantUML error: {e}")
-            raise e
+            #raise e
 
     def generate_md(self):
         """
