@@ -4,7 +4,7 @@ import typer
 from rich import print
 from typing_extensions import Annotated
 
-from shacl2md import ShaclMarkdownGenerator
+from shacl2md import ShaclMarkdownGenerator, download_jar
 
 app = typer.Typer(add_completion=False)
 
@@ -80,5 +80,15 @@ def generate(
     )
     shacl2md_generator.generate(**shacl_files_dict)
 
+@app.command(
+    context_settings={"allow_extra_args": True}
+)
+def download_plantuml_jar(
+    version : Annotated[Optional[str], typer.Argument(
+        help="version of the plantuml jar to download",
+    )]= "1.2023.11",
+):
+    download_jar(version)
+    
 if __name__ == "__main__":
     app()

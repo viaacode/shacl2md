@@ -50,12 +50,12 @@ sh_md.generate(organization="/datamodels/organizations/organizations.shacl.ttl",
 $ pip install shacl2md
 ```
 
-#### `shacl2md`
+#### `shacl2md generate`
 
 **Usage**:
 
 ```console
-$ shacl2md [OPTIONS] SHACL_FILES...
+$ shacl2md generate [OPTIONS] SHACL_FILES...
 ```
 
 **Arguments**:

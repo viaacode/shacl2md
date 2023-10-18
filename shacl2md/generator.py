@@ -1,13 +1,14 @@
 import argparse
+import subprocess
 import json
 import os
+from os.path import abspath
 from itertools import groupby
 from logging import Logger, getLogger
 from typing import List, Union
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 from lxml import etree
-from plantuml import PlantUML
 from pyshacl import validate
 from rdflib.graph import Graph, URIRef
 from rdflib.namespace import Namespace
@@ -284,36 +285,43 @@ class ShaclGraph:
         svg_filename = f"{self.name}-diagram.svg"
 
         # Generate PUML diagram
-        print(
-            self.generator.puml_template.render(
+        code = self.generator.puml_template.render(
                 namespaces=self.namespaces,
                 classes=[c.to_dict() for c in self.classes],
                 output_dir_length=self.output_dir_length,
-            ),
+            )
+        print(code,
             file=open(f"{self.output_dir}/{puml_filename}", "w"),
         )
         self.generator.logger.info(f"* File '{self.output_dir}/{puml_filename}' created")
 
         # Render PUML diagram
-        pl = PlantUML("http://www.plantuml.com/plantuml/svg/")
         try:
-            pl.processes_file(
-                f"{self.output_dir}/{puml_filename}", directory=self.output_dir, outfile=svg_filename
-            )
-            self.generator.logger.info(f"* File '{self.output_dir}/{svg_filename}' created")
+            jar_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'plantuml.jar')
+            retcode = subprocess.call([
+                "java",
+                "-jar",
+                jar_path,
+                f"{self.output_dir}/{puml_filename}",
+                "-svg",
+                "-o",
+                abspath(self.output_dir)
+                ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            
+            if retcode > 0:
+                raise
+
+            # Extract PUML SVG string
+            parser = etree.XMLParser(ns_clean=True, remove_comments=True)
+            tree = etree.parse(f"{self.output_dir}/{svg_filename}", parser)
+            tree.getroot().attrib.pop("width")
+            tree.getroot().attrib.pop("height")
+            tree.getroot().attrib.pop("style")
+            svg_text = etree.tostring(tree.getroot(), encoding="unicode", xml_declaration=False)
+            return svg_text
         except Exception as e:
             self.generator.logger.error(f"* File '{self.output_dir}/{svg_filename}' not created due to PlantUML error: {e}")
-            raise e
-
-
-        # Extract PUML SVG string
-        parser = etree.XMLParser(ns_clean=True, remove_comments=True)
-        tree = etree.parse(f"{self.output_dir}/{svg_filename}", parser)
-        tree.getroot().attrib.pop("width")
-        tree.getroot().attrib.pop("height")
-        tree.getroot().attrib.pop("style")
-        svg_text = etree.tostring(tree.getroot(), encoding="unicode", xml_declaration=False)
-        return svg_text
+            #raise e
 
     def generate_md(self):
         """
