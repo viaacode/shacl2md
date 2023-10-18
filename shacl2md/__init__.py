@@ -1,9 +1,12 @@
 import os
+
 import requests
 from tqdm import tqdm
+
 from shacl2md.generator import ShaclMarkdownGenerator
 
-PLANTUML_JAR_URL="https://github.com/plantuml/plantuml/releases/download/v1.2023.11/plantuml-1.2023.11.jar"
+PLANTUML_JAR_URL="https://github.com/plantuml/plantuml/releases/download/v1.2023.11/plantuml-{}.jar"
+PLANTUML_VERSION="1.2023.11"
 
 def get_path():
     """
@@ -25,19 +28,19 @@ def has_jar():
             return True
     return False
 
-def download_jar():
+def download_jar(version= PLANTUML_VERSION):
     """
-    Downloads the latest PlantUML jar to the shacl2md
+    Downloads the PlantUML jar to the shacl2md
     installation folder.
     @raises ConnectionError and Timeout
     """
-    print('Downloading the latest PlantUML jar, please wait...')
+    print('Downloading the PlantUML jar, please wait...')
     try:
         path2jar = os.path.join(get_path(), 'plantuml.jar')
-        request = requests.get(PLANTUML_JAR_URL, stream=True, timeout=10.0)
+        request = requests.get(PLANTUML_JAR_URL.format(version), stream=True, timeout=10.0)
         length = int(request.headers.get('content-length', 0))
         with open(path2jar, 'wb') as jar:
-            with tqdm(desc=f'Downloading {PLANTUML_JAR_URL}',
+            with tqdm(desc=f'Downloading {PLANTUML_JAR_URL.format(version)}',
                       total=length, unit='iB', unit_scale=True,
                       unit_divisor=1024) as pbar:
                 for data in request.iter_content(chunk_size=1024):
