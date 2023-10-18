@@ -8,7 +8,26 @@ Root
 > Auto-generated documentation for [shacl2md.cli.root](../../../shacl2md/cli/root.py) module.
 
 - [Root](#root)
+  - [download_plantuml_jar](#download_plantuml_jar)
   - [generate](#generate)
+
+## download_plantuml_jar
+
+[Show source in root.py:83](../../../shacl2md/cli/root.py#L83)
+
+#### Signature
+
+```python
+@app.command(context_settings={"allow_extra_args": True})
+def download_plantuml_jar(
+    version: Annotated[
+        Optional[str], typer.Argument(help="version of the plantuml jar to download")
+    ] = "1.2023.11"
+):
+    ...
+```
+
+
 
 ## generate
 

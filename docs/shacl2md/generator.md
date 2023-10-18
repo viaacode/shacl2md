@@ -25,7 +25,7 @@ Generator
 
 ## Generator
 
-[Show source in generator.py:23](../../shacl2md/generator.py#L23)
+[Show source in generator.py:24](../../shacl2md/generator.py#L24)
 
 #### Signature
 
@@ -44,7 +44,7 @@ class Generator:
 
 ### Generator().add_ontology_graph
 
-[Show source in generator.py:46](../../shacl2md/generator.py#L46)
+[Show source in generator.py:47](../../shacl2md/generator.py#L47)
 
 Add an ontology graph.
 
@@ -61,7 +61,7 @@ def add_ontology_graph(self, ontology_graph: Union[str, Graph]):
 
 ### Generator().add_shacl_graphs
 
-[Show source in generator.py:69](../../shacl2md/generator.py#L69)
+[Show source in generator.py:70](../../shacl2md/generator.py#L70)
 
 Add SHACL graphs.
 
@@ -78,7 +78,7 @@ def add_shacl_graphs(self, **shacls):
 
 ### Generator().get_graph
 
-[Show source in generator.py:60](../../shacl2md/generator.py#L60)
+[Show source in generator.py:61](../../shacl2md/generator.py#L61)
 
 Get a graph by name.
 
@@ -97,7 +97,7 @@ def get_graph(self, graph_name: str):
 
 ## ShaclGraph
 
-[Show source in generator.py:250](../../shacl2md/generator.py#L250)
+[Show source in generator.py:251](../../shacl2md/generator.py#L251)
 
 #### Signature
 
@@ -119,7 +119,7 @@ class ShaclGraph:
 
 ### ShaclGraph().generate_md
 
-[Show source in generator.py:318](../../shacl2md/generator.py#L318)
+[Show source in generator.py:326](../../shacl2md/generator.py#L326)
 
 Generate markdown documentation from the SHACL graph.
 
@@ -132,7 +132,7 @@ def generate_md(self):
 
 ### ShaclGraph().generate_puml
 
-[Show source in generator.py:279](../../shacl2md/generator.py#L279)
+[Show source in generator.py:280](../../shacl2md/generator.py#L280)
 
 Generate a PlantUML diagram from the SHACL graph.
 
@@ -145,7 +145,7 @@ def generate_puml(self):
 
 ### ShaclGraph().generate_vscode_snippet
 
-[Show source in generator.py:355](../../shacl2md/generator.py#L355)
+[Show source in generator.py:363](../../shacl2md/generator.py#L363)
 
 Generate Snippets for triples in VSCODE
 
@@ -158,7 +158,7 @@ def generate_vscode_snippet(self):
 
 ### ShaclGraph().validate
 
-[Show source in generator.py:433](../../shacl2md/generator.py#L433)
+[Show source in generator.py:441](../../shacl2md/generator.py#L441)
 
 Validate the SHACL graph against the SHACL specification.
 
@@ -173,7 +173,7 @@ def validate(self):
 
 ## ShaclMarkdownGenerator
 
-[Show source in generator.py:101](../../shacl2md/generator.py#L101)
+[Show source in generator.py:102](../../shacl2md/generator.py#L102)
 
 #### Signature
 
@@ -201,7 +201,7 @@ class ShaclMarkdownGenerator(Generator):
 
 ### ShaclMarkdownGenerator().filter_graph
 
-[Show source in generator.py:156](../../shacl2md/generator.py#L156)
+[Show source in generator.py:157](../../shacl2md/generator.py#L157)
 
 Get all other graphs.
 
@@ -218,7 +218,7 @@ def filter_graph(self, graph_name: str):
 
 ### ShaclMarkdownGenerator().filter_language
 
-[Show source in generator.py:147](../../shacl2md/generator.py#L147)
+[Show source in generator.py:148](../../shacl2md/generator.py#L148)
 
 Get all other languages.
 
@@ -235,7 +235,7 @@ def filter_language(self, lang: str):
 
 ### ShaclMarkdownGenerator().generate
 
-[Show source in generator.py:165](../../shacl2md/generator.py#L165)
+[Show source in generator.py:166](../../shacl2md/generator.py#L166)
 
 Generate markdown documentation from SHACL files.
 
@@ -279,7 +279,7 @@ def generate(self, exclude: list = None, **shacls) -> None:
 
 ## ShaclSnippetGenerator
 
-[Show source in generator.py:205](../../shacl2md/generator.py#L205)
+[Show source in generator.py:206](../../shacl2md/generator.py#L206)
 
 #### Signature
 
@@ -302,7 +302,7 @@ class ShaclSnippetGenerator(Generator):
 
 ### ShaclSnippetGenerator().generate
 
-[Show source in generator.py:226](../../shacl2md/generator.py#L226)
+[Show source in generator.py:227](../../shacl2md/generator.py#L227)
 
 Generate snippets from SHACL files. Place the snippets in the `.vscode` directory.
 
