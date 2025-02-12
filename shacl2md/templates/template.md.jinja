@@ -32,10 +32,8 @@
 
 {{doc.description}}
 
-<div class="wrap">
-  <div class="zoom">
-  {{diagramText}}
-  </div>
+<div id="zoom">
+{{diagramText}}
 </div>
 
 ## {{labels['Namespaces']}}
@@ -94,134 +92,26 @@ _{{labels['Properties from']}} [{{parent.label}}](#{{parent.shortname|urlencode}
 {% endfor %}
 [^1]: {{labels['Unique language tags required']}}
 <style>
-.zoom > svg {
+#zoom {
+  height: 50vh
+  border: 1px black solid;
+  padding: 5px
+}
+
+#zoom > svg {
     width: 100%;
-    height: auto;
-    background-color: #fff;
+    height: 100%;
 }
 
-.zoom > svg text{
-   -webkit-user-select: none;
-   -moz-user-select: none;
-   -ms-user-select: none;
-   user-select: none;
-}
-
-.wrap {
-  overflow: hidden;
-  border: 1px solid #E6E6E6;
-}
-
-.zoom {
-  position: relative;
-}
-
-.zoom:hover {
-  transform: scale(2.0); cursor: grab;
-}
 .svg-external-link {
   width: 16px;
   height: 16px;
 }
 </style>
+
+<script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.5.0/dist/svg-pan-zoom.min.js"></script>
 <script>
-var svg = document.querySelector('svg[zoomAndPan="magnify"]');
-var zoomDiv = document.querySelector('.zoom');
-zoomDiv.addEventListener('mouseleave', onMouseOutZoomDiv);
-if (window.PointerEvent) {
-  svg.addEventListener('pointerdown', onPointerDown);
-  svg.addEventListener('pointerup', onPointerUp);
-  svg.addEventListener('pointerleave', onPointerUp); 
-  svg.addEventListener('pointermove', onPointerMove); 
-} else {
-
-  svg.addEventListener('mousedown', onPointerDown); 
-  svg.addEventListener('mouseup', onPointerUp); 
-  svg.addEventListener('mouseleave', onPointerUp); 
-  svg.addEventListener('mousemove', onPointerMove); 
-
-  svg.addEventListener('touchstart', onPointerDown);
-  svg.addEventListener('touchend', onPointerUp);
-  svg.addEventListener('touchmove', onPointerMove); 
-}
-
-function getPointFromEvent (event) {
-  var point = {x:0, y:0};
-  if (event.targetTouches) {
-    point.x = event.targetTouches[0].clientX;
-    point.y = event.targetTouches[0].clientY;
-  } else {
-    point.x = event.clientX;
-    point.y = event.clientY;
-  }
-  
-  return point;
-}
-
-var isPointerDown = false;
-
-var pointerOrigin = {
-  x: 0,
-  y: 0
+window.onload = (event) => {
+  svgPanZoom('#zoom > svg')
 };
-
-function onPointerDown(event) {
-  isPointerDown = true; 
-  
-  var pointerPosition = getPointFromEvent(event);
-  pointerOrigin.x = pointerPosition.x;
-  pointerOrigin.y = pointerPosition.y;
-}
-
-var originalViewBoxString = svg.getAttribute('viewBox');
-var originalViewBoxList= svg.viewBox.baseVal;
-
-var originalViewBox = {
-    x: originalViewBoxList.x,
-    y: originalViewBoxList.y,
-    width: originalViewBoxList.width,
-    height: originalViewBoxList.height
-};
-
-var viewBox = structuredClone(originalViewBox);
-console.log(viewBox);
-var newViewBox = {
-  x: 0,
-  y: 0
-};
-
-var ratio = viewBox.width / svg.getBoundingClientRect().width;
-window.addEventListener('resize', function() {
-  ratio = viewBox.width / svg.getBoundingClientRect().width;
-});
-
-function onPointerMove (event) {
-  if (!isPointerDown) {
-    return;
-  }
-  event.preventDefault();
-
-  var pointerPosition = getPointFromEvent(event);
-
-  newViewBox.x = viewBox.x - ((pointerPosition.x - pointerOrigin.x) * ratio);
-  newViewBox.y = viewBox.y - ((pointerPosition.y - pointerOrigin.y) * ratio);
-
-  var viewBoxString = `${newViewBox.x} ${newViewBox.y} ${viewBox.width} ${viewBox.height}`;
-  svg.setAttribute('viewBox', viewBoxString);
-}
-
-function onPointerUp() {
-  isPointerDown = false;
-
-  viewBox.x = newViewBox.x;
-  viewBox.y = newViewBox.y;
-}
-function onMouseOutZoomDiv(event) {
-
-  var viewBoxString = structuredClone(originalViewBoxString);
-  viewBox.x = 0;
-  viewBox.y = 0;
-  svg.setAttribute('viewBox', originalViewBoxString);
-}
-
 </script>
