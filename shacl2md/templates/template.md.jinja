@@ -32,7 +32,7 @@
 
 {{doc.description}}
 
-<div id="zoom">
+<div id="zoom" class="table-wrapper">
 {{diagramText}}
 </div>
 
@@ -93,9 +93,8 @@ _{{labels['Properties from']}} [{{parent.label}}](#{{parent.shortname|urlencode}
 [^1]: {{labels['Unique language tags required']}}
 <style>
 #zoom {
-  height: 50vh
-  border: 1px black solid;
-  padding: 5px
+  height: 60vh;
+  padding: 5px;
 }
 
 #zoom > svg {
@@ -112,6 +111,6 @@ _{{labels['Properties from']}} [{{parent.label}}](#{{parent.shortname|urlencode}
 <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.5.0/dist/svg-pan-zoom.min.js"></script>
 <script>
 window.onload = (event) => {
-  svgPanZoom('#zoom > svg')
+  svgPanZoom('#zoom > svg', {controlIconsEnabled: true})
 };
 </script>
