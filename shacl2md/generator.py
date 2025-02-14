@@ -2,8 +2,9 @@ import subprocess
 import json
 import os
 from os.path import abspath
-from logging import Logger, getLogger
+from logging import Logger, getLogger, StreamHandler, INFO
 from typing import List, Union
+import sys
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 from lxml import etree
@@ -40,9 +41,12 @@ class Generator:
             self.add_ontology_graph(ontology_graph)
         self.languages: List[str] = languages
         if logger is None:
-            self.logger: Logger = getLogger(__name__)
+            self.logger: Logger = getLogger(__name__) 
         else:
             self.logger: Logger = logger
+        # also log to stdout using StreamHandler
+        self.logger.setLevel(INFO)
+        self.logger.addHandler(StreamHandler(sys.stdout))
 
     def add_ontology_graph(self, ontology_graph: Union[str, Graph]):
         """
