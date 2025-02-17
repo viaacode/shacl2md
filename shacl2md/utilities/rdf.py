@@ -1,17 +1,22 @@
 import json
 from typing import List
 
-from rdflib.graph import Graph, URIRef
+from rdflib.graph import Graph
 from rdflib.namespace import Namespace
 from rdflib.term import Literal
 
-from shacl2md.utilities.queries import (CLASS_EXISTS_CHECK, GET_AUTHORS,
-                                        GET_CLASS, GET_CLASSES, GET_DATATYPES,
-                                        GET_DOC_MD, GET_PROPERTIES,
-                                        GET_SUBCLASSES, GET_SUPERCLASSES,
-                                        GET_VALUES)
+from shacl2md.utilities.queries import (
+    CLASS_EXISTS_CHECK,
+    GET_CLASS,
+    GET_DATATYPES,
+    GET_PROPERTIES,
+    GET_SUBCLASSES,
+    GET_SUPERCLASSES,
+    GET_VALUES,
+)
 
 SHACL = Namespace("http://www.w3.org/ns/shacl#")
+
 
 def to_shortname(g: Graph, term):
     return term.n3(g.namespace_manager) if term is not None else ""

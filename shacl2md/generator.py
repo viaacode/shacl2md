@@ -1,16 +1,15 @@
-import argparse
 import subprocess
 import json
 import os
 from os.path import abspath
-from itertools import groupby
-from logging import Logger, getLogger
+from logging import Logger, getLogger, StreamHandler, INFO
 from typing import List, Union
+import sys
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 from lxml import etree
 from pyshacl import validate
-from rdflib.graph import Graph, URIRef
+from rdflib.graph import Graph
 from rdflib.namespace import Namespace
 from rdflib.term import Literal
 
@@ -24,27 +23,32 @@ SHACL = Namespace("http://www.w3.org/ns/shacl#")
 class Generator:
     def __init__(
         self,
-        languages : List[str], 
-        output_dir : str = "./",
-        shacl_shacl_validation : bool = False,
-        ontology_graphs : List[Union[str, Graph]] = None,
-        logger : Logger = None,
+        languages: List[str],
+        output_dir: str = "./",
+        shacl_shacl_validation: bool = False,
+        ontology_graphs: List[Union[str, Graph]] = None,
+        logger: Logger = None,
     ):
-        self.output_dir : str = output_dir
-        self.shacl_shacl_validation : bool = shacl_shacl_validation
-        self.graphs :  dict = {}
-        self.ontology_graph : Graph = Graph(identifier="ontology_graph", bind_namespaces="none")
+        self.output_dir: str = output_dir
+        self.shacl_shacl_validation: bool = shacl_shacl_validation
+        self.graphs: dict = {}
+        self.ontology_graph: Graph = Graph(
+            identifier="ontology_graph", bind_namespaces="none"
+        )
         if ontology_graphs is None:
             ontology_graphs = []
         for ontology_graph in ontology_graphs:
             self.add_ontology_graph(ontology_graph)
-        self.languages : List[str] = languages
+        self.languages: List[str] = languages
         if logger is None:
-            self.logger : Logger = getLogger(__name__)
+            self.logger: Logger = getLogger(__name__) 
         else:
-            self.logger : Logger = logger
+            self.logger: Logger = logger
+        # also log to stdout using StreamHandler
+        self.logger.setLevel(INFO)
+        self.logger.addHandler(StreamHandler(sys.stdout))
 
-    def add_ontology_graph(self, ontology_graph : Union[str, Graph]):
+    def add_ontology_graph(self, ontology_graph: Union[str, Graph]):
         """
         Add an ontology graph.
 
@@ -74,46 +78,43 @@ class Generator:
         Args:
             **shacls: Dictionary of SHACL files or Graphs to generate documentation for. The key is the name of the SHACL graph, the value is the filename of the SHACL file.
         """
-        shacl_graphs : List[ShaclGraph] = []
+        shacl_graphs: List[ShaclGraph] = []
         # parse shacl files to graphs
-        for shacl, shacl_filename_or_graph in shacls.items():
+        for shacl, shacl_filename_or_graphs in shacls.items():
             g = Graph(identifier=shacl, bind_namespaces="none")
-            if isinstance(shacl_filename_or_graph, str):
-                g.parse(shacl_filename_or_graph)
-            elif isinstance(shacl_filename_or_graph, Graph):
-                g += shacl_filename_or_graph
-                for name, uri in shacl_filename_or_graph.namespaces():
-                    g.bind(name, uri)
+            for shacl_filename_or_graph in shacl_filename_or_graphs:
+                if isinstance(shacl_filename_or_graph, str):
+                    g.parse(shacl_filename_or_graph)
+                elif isinstance(shacl_filename_or_graph, Graph):
+                    g += shacl_filename_or_graph
+                    for name, uri in shacl_filename_or_graph.namespaces():
+                        g.bind(name, uri)
             self.graphs[shacl] = g
 
         for shacl in self.graphs.keys():
             for lang in self.languages:
-                shacl_graph = ShaclGraph(
-                    shacl,
-                    lang,
-                    self
-                )
+                shacl_graph = ShaclGraph(shacl, lang, self)
                 shacl_graphs.append(shacl_graph)
             if self.shacl_shacl_validation:
                 shacl_graph.validate()
 
         return shacl_graphs
 
-class ShaclMarkdownGenerator(Generator): 
 
+class ShaclMarkdownGenerator(Generator):
     def __init__(
         self,
-        languages : List[str], 
-        output_dir : str= "./", 
-        shacl_shacl_validation : bool = False,
-        version_directory : bool = False, 
-        crosslink_between_graphs : bool = False,
-        jekyll_parent_page : str = "index",
-        jekyll_layout : str = "default",
-        jekyll_nav_order : int = 1,
-        ontology_graphs : List[Union[str, Graph]] = None,
-        logger : Logger = None,
-        ):
+        languages: List[str],
+        output_dir: str = "./",
+        shacl_shacl_validation: bool = False,
+        version_directory: bool = False,
+        crosslink_between_graphs: bool = False,
+        jekyll_parent_page: str = "index",
+        jekyll_layout: str = "default",
+        jekyll_nav_order: int = 1,
+        ontology_graphs: List[Union[str, Graph]] = None,
+        logger: Logger = None,
+    ):
         """
         A shacl markdown generator object.
 
@@ -129,21 +130,22 @@ class ShaclMarkdownGenerator(Generator):
             ontology_graphs (List[str | Graph], optional): List of ontology files or Graphs, to include with the SHACL shapes, e.g., class definitions or reasoning. Defaults to [].
             logger (Logger, optional): logging.Logger. Defaults to None.
         """
-        super().__init__(languages, output_dir, shacl_shacl_validation, ontology_graphs, logger)
-        self.version_directory : bool = version_directory
-        self.crosslink_between_graphs : bool = crosslink_between_graphs
-        self.jekyll_parent_page : str = jekyll_parent_page
-        self.jekyll_layout : str = jekyll_layout
-        self.jekyll_nav_order : int = jekyll_nav_order
+        super().__init__(
+            languages, output_dir, shacl_shacl_validation, ontology_graphs, logger
+        )
+        self.version_directory: bool = version_directory
+        self.crosslink_between_graphs: bool = crosslink_between_graphs
+        self.jekyll_parent_page: str = jekyll_parent_page
+        self.jekyll_layout: str = jekyll_layout
+        self.jekyll_nav_order: int = jekyll_nav_order
 
         self.env = Environment(
-                        loader=PackageLoader("shacl2md"),
-                        autoescape=select_autoescape(),
-                        trim_blocks=True,
-                    )
+            loader=PackageLoader("shacl2md"),
+            autoescape=select_autoescape(),
+            trim_blocks=True,
+        )
         self.template = self.env.get_template("template.md.jinja")
         self.puml_template = self.env.get_template("diagram.puml.jinja")
-        
 
     def filter_language(self, lang: str):
         """
@@ -163,10 +165,7 @@ class ShaclMarkdownGenerator(Generator):
         """
         return [g for n, g in self.graphs.items() if n != graph_name]
 
-    def generate(
-        self, 
-        exclude: list = None,
-        **shacls) -> None:
+    def generate(self, exclude: list = None, **shacls) -> None:
         """
         Generate markdown documentation from SHACL files.
 
@@ -196,25 +195,26 @@ class ShaclMarkdownGenerator(Generator):
         """
         if not exclude:
             exclude = []
-        shacl_graphs : List[ShaclGraph] = self.add_shacl_graphs(**shacls)
-        
+        shacl_graphs: List[ShaclGraph] = self.add_shacl_graphs(**shacls)
+
         for shacl_graph in shacl_graphs:
             if shacl_graph.name in exclude or shacl_graph.name == "exclude":
                 continue
             shacl_graph.generate_md()
 
+
 class ShaclSnippetGenerator(Generator):
     def __init__(
         self,
-        languages : List[str] = ["en"],
-        output_dir : str= "./", 
-        shacl_shacl_validation : bool = False,
-        ontology_graphs : List[Union[str, Graph]] = None,
-        logger : Logger = None,
-        ):
+        languages: List[str] = ["en"],
+        output_dir: str = "./",
+        shacl_shacl_validation: bool = False,
+        ontology_graphs: List[Union[str, Graph]] = None,
+        logger: Logger = None,
+    ):
         """
         A shacl snippet generator object.
-        
+
         Args:
             languages (List[str], optional): List of languages to generate snippets for. Defaults to ["en"].
             output_dir (str, optional): Output directory. Defaults to "./".
@@ -222,11 +222,11 @@ class ShaclSnippetGenerator(Generator):
             ontology_graphs (List[str | Graph], optional): List of ontology files or Graphs, to include with the SHACL shapes, e.g., class definitions or reasoning. Defaults to [].
             logger (Logger, optional): logging.Logger. Defaults to None.
         """
-        super().__init__(languages, output_dir, shacl_shacl_validation, ontology_graphs, logger)
+        super().__init__(
+            languages, output_dir, shacl_shacl_validation, ontology_graphs, logger
+        )
 
-    def generate(
-        self,
-        **shacls):
+    def generate(self, **shacls):
         """
         Generate snippets from SHACL files. Place the snippets in the `.vscode` directory.
 
@@ -244,17 +244,17 @@ class ShaclSnippetGenerator(Generator):
             ...     description="/path_to_shacl/description.shacl.ttl",
             ... )
         """
-        shacl_graphs : List[ShaclGraph] = self.add_shacl_graphs(**shacls)
+        shacl_graphs: List[ShaclGraph] = self.add_shacl_graphs(**shacls)
         for shacl_graph in shacl_graphs:
             shacl_graph.generate_vscode_snippet()
 
-class ShaclGraph:
 
+class ShaclGraph:
     def __init__(
         self,
         name: str,
-        lang : str,
-        generator : Union[ShaclMarkdownGenerator, ShaclSnippetGenerator],
+        lang: str,
+        generator: Union[ShaclMarkdownGenerator, ShaclSnippetGenerator],
     ):
         """
         A shacl graph object.
@@ -270,7 +270,7 @@ class ShaclGraph:
         self.name = name
         self.lang = lang
         self.generator = generator
-        self.graph : Graph = generator.get_graph(name)
+        self.graph: Graph = generator.get_graph(name)
         self.graph += generator.ontology_graph
         self.doc = self._get_doc()
         self.output_dir, self.output_dir_length = self._generate_output_dir()
@@ -286,28 +286,37 @@ class ShaclGraph:
 
         # Generate PUML diagram
         code = self.generator.puml_template.render(
-                namespaces=self.namespaces,
-                classes=[c.to_dict() for c in self.classes],
-                output_dir_length=self.output_dir_length,
-            )
-        print(code,
+            namespaces=self.namespaces,
+            classes=[c.to_dict() for c in self.classes],
+            output_dir_length=self.output_dir_length,
+        )
+        print(
+            code,
             file=open(f"{self.output_dir}/{puml_filename}", "w"),
         )
-        self.generator.logger.info(f"* File '{self.output_dir}/{puml_filename}' created")
+        self.generator.logger.info(
+            f"* File '{self.output_dir}/{puml_filename}' created"
+        )
 
         # Render PUML diagram
         try:
-            jar_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'plantuml.jar')
-            retcode = subprocess.call([
-                "java",
-                "-jar",
-                jar_path,
-                f"{self.output_dir}/{puml_filename}",
-                "-svg",
-                "-o",
-                abspath(self.output_dir)
-                ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            
+            jar_path = os.path.join(
+                os.path.realpath(os.path.dirname(__file__)), "plantuml.jar"
+            )
+            retcode = subprocess.call(
+                [
+                    "java",
+                    "-jar",
+                    jar_path,
+                    f"{self.output_dir}/{puml_filename}",
+                    "-svg",
+                    "-o",
+                    abspath(self.output_dir),
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+
             if retcode > 0:
                 raise
 
@@ -317,11 +326,15 @@ class ShaclGraph:
             tree.getroot().attrib.pop("width")
             tree.getroot().attrib.pop("height")
             tree.getroot().attrib.pop("style")
-            svg_text = etree.tostring(tree.getroot(), encoding="unicode", xml_declaration=False)
+            svg_text = etree.tostring(
+                tree.getroot(), encoding="unicode", xml_declaration=False
+            )
             return svg_text
         except Exception as e:
-            self.generator.logger.error(f"* File '{self.output_dir}/{svg_filename}' not created due to PlantUML error: {e}")
-            #raise e
+            self.generator.logger.error(
+                f"* File '{self.output_dir}/{svg_filename}' not created due to PlantUML error: {e}"
+            )
+            # raise e
 
     def generate_md(self):
         """
@@ -373,7 +386,9 @@ class ShaclGraph:
                 "body": [],
                 "description": rdf_class.label,
             }
-            snippet_json[f"({self.name}){rdf_class.shortname}"]["body"].append(f"${{1:URI}} a {rdf_class.shortname} ;")
+            snippet_json[f"({self.name}){rdf_class.shortname}"]["body"].append(
+                f"${{1:URI}} a {rdf_class.shortname} ;"
+            )
             i = 2
             for prop in rdf_class.properties:
                 if prop.description:
@@ -382,14 +397,21 @@ class ShaclGraph:
                     snippet_prop = f"\t{prop.shortname} ${{{i}:{prop.label} ({', '.join([p_dt.shortname for p_dt in prop.datatypes])})}} ;"
                 else:
                     snippet_prop = f"\t{prop.shortname} ${{{i}:({', '.join([p_dt.shortname for p_dt in prop.datatypes])})}} ;"
-                snippet_json[f"({self.name}){rdf_class.shortname}"]["body"].append(snippet_prop)
+                snippet_json[f"({self.name}){rdf_class.shortname}"]["body"].append(
+                    snippet_prop
+                )
                 i += 1
             if snippet_json[f"({self.name}){rdf_class.shortname}"]["body"]:
-                snippet_json[f"({self.name}){rdf_class.shortname}"]["body"][-1] = snippet_json[f"({self.name}){rdf_class.shortname}"]["body"][-1][:-1] + "."
-        with open(f"{self.output_dir}{self.name}.code-snippets", "w", encoding ='utf8') as json_file:
+                snippet_json[f"({self.name}){rdf_class.shortname}"]["body"][-1] = (
+                    snippet_json[f"({self.name}){rdf_class.shortname}"]["body"][-1][:-1]
+                    + "."
+                )
+        with open(
+            f"{self.output_dir}{self.name}.code-snippets", "w", encoding="utf8"
+        ) as json_file:
             json.dump(snippet_json, json_file)
             self.generator.logger.info(f"Generated snippet for {self.name}")
-            
+
     def _get_classes(self):
         crosslink_graphs = []
         try:
@@ -397,8 +419,16 @@ class ShaclGraph:
                 crosslink_graphs = self.generator.filter_graph(self.name)
         except AttributeError:
             pass
-        for c in self.graph.query(GET_CLASSES, initBindings={"lang": Literal(self.lang)}):
-            c = RDFClass(self.lang, c.iri, to_shortname(self.graph, c.iri), c.label, c.description)
+        for c in self.graph.query(
+            GET_CLASSES, initBindings={"lang": Literal(self.lang)}
+        ):
+            c = RDFClass(
+                self.lang,
+                c.iri,
+                to_shortname(self.graph, c.iri),
+                c.label,
+                c.description,
+            )
             c.check_crosslink(self.graph, crosslink_graphs)
             c.get_properties(self.graph, crosslink_graphs)
             c.get_subclasses(self.graph)
@@ -412,7 +442,9 @@ class ShaclGraph:
             version_directory = self.generator.version_directory
             if version_directory:
                 if self.doc is None or self.doc.version is None:
-                    self.generator.logger.warning("* Version info not found; outputting in main directory.")
+                    self.generator.logger.warning(
+                        "* Version info not found; outputting in main directory."
+                    )
                     output_dir = base_output_dir
                 else:
                     output_dir = f"{base_output_dir}/{self.doc.version}"
@@ -434,7 +466,9 @@ class ShaclGraph:
         return output_dir, output_dir_length
 
     def _get_doc(self):
-        for row in self.graph.query(GET_DOC_MD, initBindings={"lang": Literal(self.lang)}):
+        for row in self.graph.query(
+            GET_DOC_MD, initBindings={"lang": Literal(self.lang)}
+        ):
             row.authors = list(self.graph.query(GET_AUTHORS))
             return row
 
@@ -443,11 +477,11 @@ class ShaclGraph:
         Validate the SHACL graph against the SHACL specification.
         """
         r = validate(
-                self.graph,
-                shacl_graph="http://www.w3.org/ns/shacl-shacl",
-                abort_on_first=True,
-                allow_infos=True,
-                allow_warnings=True,
-            )
+            self.graph,
+            shacl_graph="http://www.w3.org/ns/shacl-shacl",
+            abort_on_first=True,
+            allow_infos=True,
+            allow_warnings=True,
+        )
         conforms, results_graph, results_text = r
         self.generator.logger.info(f"* {results_text}")
