@@ -42,11 +42,12 @@ class Generator:
         self.languages: List[str] = languages
         if logger is None:
             self.logger: Logger = getLogger(__name__) 
+            # also log to stdout using StreamHandler
+            self.logger.setLevel(INFO)
+            self.logger.addHandler(StreamHandler(sys.stdout))
         else:
             self.logger: Logger = logger
-        # also log to stdout using StreamHandler
-        self.logger.setLevel(INFO)
-        self.logger.addHandler(StreamHandler(sys.stdout))
+            
 
     def add_ontology_graph(self, ontology_graph: Union[str, Graph]):
         """
