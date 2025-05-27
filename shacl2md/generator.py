@@ -83,6 +83,10 @@ class Generator:
         # parse shacl files to graphs
         for shacl, shacl_filename_or_graphs in shacls.items():
             g = Graph(identifier=shacl, bind_namespaces="none")
+            
+            if not isinstance(shacl_filename_or_graphs, list):
+                shacl_filename_or_graphs = [shacl_filename_or_graphs]
+
             for shacl_filename_or_graph in shacl_filename_or_graphs:
                 if isinstance(shacl_filename_or_graph, str):
                     g.parse(shacl_filename_or_graph)
