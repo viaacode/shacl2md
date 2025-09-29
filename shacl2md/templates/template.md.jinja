@@ -86,6 +86,21 @@
 _{{labels['Properties from']}} [{{parent.label}}](#{{parent.shortname|urlencode}}):_ {% for property in parent.properties %}{% if loop.index > 1 %}, {% endif %} [{{property.label}}](#{{property.shortname|urlencode}}){% endfor %}
 {% endif %}
 
+{% if class.instances|length > 0%}
+**{{labels['Instances']}}:** 
+<div 
+  class="js-read-smore" 
+  data-read-smore-chars="100" 
+  data-read-smore-more-text="{{labels['MoreInstances']}}"
+  data-read-smore-less-text="{{labels['LessInstances']}}"
+>
+<ul>
+{% for value in class.instances -%}
+<li>{{value.label}} <small>[({{value.shortname}})]({{value.iri}})</small></li>
+{% endfor %}
+</ul>
+</div>
+{% endif %}
 
 {% endfor %}
 {% endif %}
@@ -109,8 +124,18 @@ _{{labels['Properties from']}} [{{parent.label}}](#{{parent.shortname|urlencode}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.5.0/dist/svg-pan-zoom.min.js"></script>
+<script src="https://unpkg.com/read-smore@2.0.4/dist/index.umd.js"></script>
 <script>
 window.onload = (event) => {
   svgPanZoom('#zoom > svg', {controlIconsEnabled: true})
+
+  // Init JS
+  const ReadSmore = window.readSmore
+
+  // target all read more elements
+  const readMoreEls = document.querySelectorAll('.js-read-smore')
+
+  // Init
+  ReadSmore(readMoreEls).init()
 };
 </script>

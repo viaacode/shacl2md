@@ -9,6 +9,7 @@ from shacl2md.utilities.queries import (
     CLASS_EXISTS_CHECK,
     GET_CLASS,
     GET_DATATYPES,
+    GET_INSTANCES,
     GET_PROPERTIES,
     GET_SUBCLASSES,
     GET_SUPERCLASSES,
@@ -39,6 +40,7 @@ class RDFClass:
         self.properties = []
         self.subclasses = []
         self.superclasses = []
+        self.instances = []
         self.type = "class"
         self.crosslink = None
 
@@ -132,6 +134,19 @@ class RDFClass:
                     if not class_exists:
                         self.crosslink = graph.identifier
                     self.get_class_info(graph)
+
+    def get_instances(self, g: Graph):
+        def get_instances_generator():
+            for value in g.query(
+                GET_INSTANCES, initBindings={"lang": Literal(self.lang), "class": self.iri}
+            ):
+                yield RDFValue(
+                    value.iri,
+                    to_shortname(g, value.iri),
+                    value.label,
+                )
+
+        self.instances = list(get_instances_generator())
 
     # # deep copy method
     # def copy(self):
