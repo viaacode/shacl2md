@@ -30,6 +30,9 @@ WHERE {
 """
 GET_CLASS = """
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
 SELECT DISTINCT ?label ?description
 WHERE {
     ?shape a sh:NodeShape ;
@@ -221,5 +224,21 @@ PREFIX sh: <http://www.w3.org/ns/shacl#>
 ASK {
     ?shape a sh:NodeShape ;
         sh:targetClass ?iri .
+}
+"""
+
+GET_INSTANCES = """
+PREFIX sh: <http://www.w3.org/ns/shacl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema: <http://schema.org/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+SELECT DISTINCT ?iri ?label
+WHERE {
+    ?iri a ?class .
+
+    OPTIONAL {
+        ?iri skos:prefLabel|schema:name|rdfs:label ?label
+        FILTER(lang(?label) = ?lang)
+    }    
 }
 """

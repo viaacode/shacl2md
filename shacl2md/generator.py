@@ -438,6 +438,7 @@ class ShaclGraph:
             c.get_properties(self.graph, crosslink_graphs)
             c.get_subclasses(self.graph)
             c.get_superclasses(self.graph)
+            c.get_instances(self.graph)
             yield c
 
     def _generate_output_dir(self):
